@@ -254,7 +254,7 @@ inline void matmul_configure_mop(bool transpose, const std::uint32_t ct_dim, con
 
     load_replay_buf(replay_buf_offset, replay_buf_len, false, 
         // Lambda function to load reply buffer
-        [high_fidelity, reuse_a, partial_face, is_in1_16x16, is_in0_16x16, is_in1_32x16, is_in0_16x32, is_in0_32x16, t_dim] {
+        [high_fidelity, reuse_a, partial_face, is_in1_16x16, is_in0_16x16, is_in1_32x16, is_in0_16x32, is_in0_32x16, is_in1_16x32, t_dim] {
             if (is_in1_16x16) {
                 TTI_MVMUL(p_setrwc::CLR_NONE, 0, ADDR_MOD_0, 0); // B0A0 // srca=srca, srcb+=8,  dest+=8
                 TTI_MVMUL(p_setrwc::CLR_NONE, 0, ADDR_MOD_1, 0); // B0A0 // srca=srca, srcb+=24, dest+=24 //FIXME: dest not correct

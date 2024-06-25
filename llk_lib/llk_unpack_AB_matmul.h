@@ -30,22 +30,22 @@ inline void _llk_unpack_AB_matmul_mop_config_(const bool transpose, const std::u
             });
         #else
             static_assert(kernel_broadcast_b<=1, "kernel_broadcast>1 on matmul input 1 is not supported with reuse enabled");
-            load_replay_buf(0, replay_buf_prog_len, false, 
+            load_replay_buf(0, replay_buf_prog_len, false,
                 // Lambda function to set up replay buffer
                 [unpA_partial_face] {
                     if (unpA_partial_face) {
-                        TTI_UNPACR_NOP(p_unpacr_nop::UNP0, p_unpacr_nop::UNP_ZEROSRC);
+                        TTI_UNPACR_NOP(SrcA, 0, 0, p_unpacr_nop::SET_DVALID, 0, 0, 0, 0, p_unpacr_nop::UNP_ZEROSRC);
                         TTI_UNPACR(SrcA, 0b00010001, 0, 0, 0, 1 /*Set OvrdThreadId*/, 0 /*Set Dvalid*/, p_unpacr::RAREFYB_DISABLE, 0, 0 /* Set ContextIdInc */, 0, 0, 1);
                         TTI_UNPACR(SrcA, 0b00010001, 0, 0, 0, 1 /*Set OvrdThreadId*/, 1 /*Set Dvalid*/, p_unpacr::RAREFYB_DISABLE, 0, 0 /* Set ContextIdInc */, 0, 0, 1);
                         TTI_SETADCZW(p_setadc::UNP_A, 0, 0, 0, 0, 0b0101); // Set ch0_z=0, ch1_z=0
                     } else {
                         TTI_UNPACR(SrcA, 0, 0, 0, 0, 1 /*Set OvrdThreadId*/, 1 /*Set Dvalid*/, p_unpacr::RAREFYB_DISABLE, 0, 0 /* Set ContextIdInc */, 0, 0, 1);
-                    } 
+                    }
                     if constexpr (kernel_broadcast_b==1) {
                         TTI_NOP;
                         TTI_NOP;
                         TTI_NOP;
-                    } else {  
+                    } else {
                         TTI_RDCFG(p_gpr_unpack::TMP0, THCON_SEC0_REG3_Base_address_ADDR32);
                         TTI_ADDDMAREG(0, p_gpr_unpack::TMP0, p_gpr_unpack::TMP0, p_gpr_unpack::TILE_SIZE_A);
                         TTI_STALLWAIT(p_stall::STALL_CFG, p_stall::THCON);
@@ -53,7 +53,7 @@ inline void _llk_unpack_AB_matmul_mop_config_(const bool transpose, const std::u
                     }
                     TTI_NOP;
                     if (unpA_partial_face) {
-                        TTI_UNPACR_NOP(p_unpacr_nop::UNP0, p_unpacr_nop::UNP_ZEROSRC);
+                        TTI_UNPACR_NOP(SrcA, 0, 0, p_unpacr_nop::SET_DVALID, 0, 0, 0, 0, p_unpacr_nop::UNP_ZEROSRC);
                         TTI_UNPACR(SrcA, 0b00010001, 0, 0, 0, 1 /*Set OvrdThreadId*/, 0 /*Set Dvalid*/, p_unpacr::RAREFYB_DISABLE, 0, 0 /* Set ContextIdInc */, 0, 0, 1);
                         TTI_UNPACR(SrcA, 0b00010001, 0, 0, 0, 1 /*Set OvrdThreadId*/, 1 /*Set Dvalid*/, p_unpacr::RAREFYB_DISABLE, 0, 0 /* Set ContextIdInc */, 0, 0, 1);
                         TTI_SETADCZW(p_setadc::UNP_A, 0, 0, 0, 0, 0b0101); // Set ch0_z=0, ch1_z=0
@@ -64,7 +64,7 @@ inline void _llk_unpack_AB_matmul_mop_config_(const bool transpose, const std::u
                         TTI_NOP;
                         TTI_NOP;
                         TTI_NOP;
-                    } else { 
+                    } else {
                         TTI_RDCFG(p_gpr_unpack::TMP0, THCON_SEC0_REG3_Base_cntx1_address_ADDR32);
                         TTI_ADDDMAREG(0, p_gpr_unpack::TMP0, p_gpr_unpack::TMP0, p_gpr_unpack::TILE_SIZE_A);
                         TTI_STALLWAIT(p_stall::STALL_CFG, p_stall::THCON);
@@ -81,7 +81,7 @@ inline void _llk_unpack_AB_matmul_mop_config_(const bool transpose, const std::u
             });
         #else
             static_assert(kernel_broadcast_a<=1, "kernel_broadcast>1 on matmul input 0 is not supported with reuse enabled");
-            load_replay_buf(0, replay_buf_prog_len, false, 
+            load_replay_buf(0, replay_buf_prog_len, false,
                 // Lambda function to set up replay buffer
                 [unpB_partial_face] {
                     if (unpB_partial_face) {
@@ -231,10 +231,10 @@ inline void _llk_unpack_AB_matmul_(
         std::uint32_t offset_address_a =tile_size_a*(tile_index_a + (reuse_a ? (t*kt_dim) : (0)));
         std::uint32_t offset_address_b = tile_size_b*(tile_index_b + (reuse_a ? (0       ) : (t)));
         if constexpr (kernel_broadcast_a>0) {
-            offset_address_a =tile_size_a*(tile_index_a + (reuse_a ? ((t*kt_dim)%kernel_broadcast_a) : (0)));
+            offset_address_a      = tile_size_a*((tile_index_a + (reuse_a ? ((    t*kt_dim)) : (0)))%kernel_broadcast_a);
         }
         if constexpr (kernel_broadcast_b>0) {
-            offset_address_b = tile_size_b*(tile_index_b + (reuse_a ? (0       ) : (t%kernel_broadcast_b)));
+            offset_address_b      = tile_size_b*((tile_index_b + (reuse_a ? (0) : (    t)))%kernel_broadcast_b);
         }
 
         std::uint32_t address_a = base_address_a + offset_address_a;
@@ -273,13 +273,13 @@ inline void _llk_unpack_AB_matmul_(
             #else
                 if (unpA_partial_face) {
                     // Do face by face unpacking
-                    TTI_UNPACR_NOP(p_unpacr_nop::UNP0, p_unpacr_nop::UNP_ZEROSRC);
+                    TTI_UNPACR_NOP(SrcA, 0, 0, p_unpacr_nop::SET_DVALID, 0, 0, 0, 0, p_unpacr_nop::UNP_ZEROSRC);
                     TTI_UNPACR(SrcA, 0b00010001, 0, 0, 0, 1 /*Set OvrdThreadId*/, 0 /*Set Dvalid*/, p_unpacr::RAREFYB_DISABLE, 0, 0 /* Set ContextIdInc */, 0, 0, 1);
                     TTI_UNPACR(SrcA, 0b00010001, 0, 0, 0, 1 /*Set OvrdThreadId*/, 1 /*Set Dvalid*/, p_unpacr::RAREFYB_DISABLE, 0, 0 /* Set ContextIdInc */, 0, 0, 1);
                     TTI_SETADCZW(p_setadc::UNP_A, 0, 0, 0, 0, 0b0101); // Set ch0_z=0, ch1_z=0
                 } else {
                     TTI_UNPACR(SrcA, 0, 0, 0, 0, 1 /*Set OvrdThreadId*/, 1 /*Set Dvalid*/, p_unpacr::RAREFYB_DISABLE, 0, 0 /* Set ContextIdInc */, 0, 0, 1);
-                }    
+                }
             #endif
         }
 
@@ -292,7 +292,7 @@ inline void _llk_unpack_AB_matmul_(
         // Switch unpacker config context
         switch_config_context(unp_cfg_context);
     }
-    
+
 
     #ifdef PERF_DUMP
         first_unpack_recorded = true;
