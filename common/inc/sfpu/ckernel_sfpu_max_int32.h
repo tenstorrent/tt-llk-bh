@@ -20,7 +20,7 @@ template <bool APPROXIMATION_MODE, int ITERATIONS>
 inline void _calculate_max_int32_(const int iterations)
 {
     // Modifies LOAD/STORE to work with INT32 2's complement, however
-    // due to a bug in Blackhole this has no effect and format is INT32 sign-magnitude.
+    // in Blackhole this has no effect and format remains INT32 sign-magnitude.
     constexpr auto INSTR_MOD_LOAD_STORE = InstrModLoadStore::INT32_2S_COMP;
 
     // LOAD/STORE have the value in INT sign magnitude format and SFPU needs it as 2's complement.
