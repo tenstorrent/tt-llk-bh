@@ -22,7 +22,7 @@ inline void _llk_unpack_AB_matmul_mop_config_(const bool transpose, const std::u
     const bool reuse_a = ct_dim >= rt_dim;
     const std::uint32_t replay_buf_prog_len = (reuse_a && unpA_partial_face) ? 16 : ((!reuse_a && unpB_partial_face) ? 16 : 10);
     const std::uint32_t replay_buf_run_len  = replay_buf_prog_len/2;
-    TT_LOG("reuseA: {}, unpA_partial_face: {}, replay_buf_prog_len: {}", reuse_a, unpA_partial_face, replay_buf_prog_len);
+
     if (reuse_a) {
         #if SKIP_UNP == 1
             load_replay_buf<0, 1>([] {
@@ -52,6 +52,8 @@ inline void _llk_unpack_AB_matmul_mop_config_(const bool transpose, const std::u
                         TTI_STALLWAIT(p_stall::STALL_CFG, p_stall::THCON);
                         TTI_WRCFG(p_gpr_unpack::TMP0,0,THCON_SEC0_REG3_Base_address_ADDR32);
                     }
+                    // Added to ensure WRCFG instruction has finished, since it takes 2 cycles.
+                    TTI_NOP;
 
                     if (unpA_partial_face) {
                         TTI_UNPACR_NOP(SrcA, 0, 0, 0/*Set Dvalid*/, 0, 0, 0, 0, p_unpacr_nop::UNP_ZEROSRC);
@@ -72,6 +74,8 @@ inline void _llk_unpack_AB_matmul_mop_config_(const bool transpose, const std::u
                         TTI_STALLWAIT(p_stall::STALL_CFG, p_stall::THCON);
                         TTI_WRCFG(p_gpr_unpack::TMP0,0,THCON_SEC0_REG3_Base_cntx1_address_ADDR32);
                     }
+                    // Added to ensure WRCFG instruction has finished, since it takes 2 cycles.
+                    TTI_NOP;
                 }
             );
         #endif
@@ -104,6 +108,8 @@ inline void _llk_unpack_AB_matmul_mop_config_(const bool transpose, const std::u
                         TTI_STALLWAIT(p_stall::STALL_CFG, p_stall::THCON);
                         TTI_WRCFG(p_gpr_unpack::TMP0,0,THCON_SEC1_REG3_Base_address_ADDR32);
                     }
+                    // Added to ensure WRCFG instruction has finished, since it takes 2 cycles.
+                    TTI_NOP;
 
                     if (unpB_partial_face) {
                         TTI_UNPACR_NOP(SrcB, 0, 0, 0 /*Set Dvalid*/, 0, 0, 0, 0, p_unpacr_nop::UNP_ZEROSRC);
@@ -124,6 +130,8 @@ inline void _llk_unpack_AB_matmul_mop_config_(const bool transpose, const std::u
                         TTI_STALLWAIT(p_stall::STALL_CFG, p_stall::THCON);
                         TTI_WRCFG(p_gpr_unpack::TMP0,0,THCON_SEC1_REG3_Base_cntx1_address_ADDR32);
                     }
+                    // Added to ensure WRCFG instruction has finished, since it takes 2 cycles.
+                    TTI_NOP;
                 }
             );
         #endif
