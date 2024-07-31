@@ -20,7 +20,7 @@ inline void _llk_unpack_AB_matmul_mop_config_(const bool transpose, const std::u
     // in1/inB - loaded to SrcA
 
     const bool reuse_a = ct_dim >= rt_dim;
-    const std::uint32_t replay_buf_prog_len = (reuse_a && unpA_partial_face) ? 16 : ((!reuse_a && unpB_partial_face) ? 16 : 10);
+    const std::uint32_t replay_buf_prog_len = (reuse_a && unpA_partial_face) ? 18 : ((!reuse_a && unpB_partial_face) ? 18 : 12);
     const std::uint32_t replay_buf_run_len  = replay_buf_prog_len/2;
 
     if (reuse_a) {
