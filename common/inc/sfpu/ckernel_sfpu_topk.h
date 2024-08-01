@@ -120,39 +120,28 @@ inline void bitonic_topk_ph3_st4_to_1(bool dir, bool &init_replay, int replay_st
         TTI_SFPNOP;
     }
 
-    // if (init_replay) {
-        // TT_REPLAY(replay_start, 7, 1, 1);
+    if (init_replay) {
+        load_replay_buf(replay_start, 7, 1,
+            [] {
+                // Step 4
+                TTI_SFPSWAP(0, p_sfpu::LREG0, p_sfpu::LREG2, p_sfpswap::ALL_ROWS_MAX);
+                TTI_SFPSWAP(0, p_sfpu::LREG1, p_sfpu::LREG3, p_sfpswap::ALL_ROWS_MAX);
+                TTI_SFPNOP;
 
-    // Step 4
-    TTI_SFPSWAP(0, p_sfpu::LREG0, p_sfpu::LREG2, p_sfpswap::ALL_ROWS_MAX);
-    TTI_SFPSWAP(0, p_sfpu::LREG1, p_sfpu::LREG3, p_sfpswap::ALL_ROWS_MAX);
-    TTI_SFPNOP;
+                // Step 3
+                TTI_SFPSWAP(0, p_sfpu::LREG0, p_sfpu::LREG1, p_sfpswap::ALL_ROWS_MAX);
+                TTI_SFPSWAP(0, p_sfpu::LREG2, p_sfpu::LREG3, p_sfpswap::ALL_ROWS_MAX);
+                TTI_SFPNOP;
 
-    // Step 3
-    TTI_SFPSWAP(0, p_sfpu::LREG0, p_sfpu::LREG1, p_sfpswap::ALL_ROWS_MAX);
-    TTI_SFPSWAP(0, p_sfpu::LREG2, p_sfpu::LREG3, p_sfpswap::ALL_ROWS_MAX);
-    TTI_SFPNOP;
-
-    TTI_SFPTRANSP(0,0,0,0);
-
-    init_replay = false;
-    // } else {
-    //     TT_REPLAY(replay_start, 7, 0, 0);
-    // }
+                TTI_SFPTRANSP(0,0,0,0);
+            }
+        );
+        init_replay = false;
+    } else {
+        TT_REPLAY(replay_start, 7, 0, 0);
+    }
     
-    // TT_REPLAY(replay_start, 7, 0, 0);
-
-    // Step 2
-    TTI_SFPSWAP(0, p_sfpu::LREG0, p_sfpu::LREG2, p_sfpswap::ALL_ROWS_MAX);
-    TTI_SFPSWAP(0, p_sfpu::LREG1, p_sfpu::LREG3, p_sfpswap::ALL_ROWS_MAX);
-    TTI_SFPNOP;
-
-    // Step 1
-    TTI_SFPSWAP(0, p_sfpu::LREG0, p_sfpu::LREG1, p_sfpswap::ALL_ROWS_MAX);
-    TTI_SFPSWAP(0, p_sfpu::LREG2, p_sfpu::LREG3, p_sfpswap::ALL_ROWS_MAX);
-    TTI_SFPNOP;
-
-    TTI_SFPTRANSP(0,0,0,0);
+    TT_REPLAY(replay_start, 7, 0, 0);
 
     if (dir == (bool)SortDir::ArgMin) {
         TT_LOG("Restore max/min reverse");
@@ -275,68 +264,67 @@ inline void _bitonic_topk_phases_steps(
                 case 0:
                     for (int d=0; d<4; d++) {
                         // Groups of 16 datums being sorted at the same time
-                        // if (init_load) {
-                            // TT_REPLAY(0, 8, 1, 1);
-                            bitonic_topk_load16(4, 8);
+                        if (init_load) {
+                            load_replay_buf<0, 8, true>([] {
+                                bitonic_topk_load16(4, 8);
+                            });
                             init_load = false;
-                        // } else {
-                            // TT_REPLAY(0, 8, 0, 0);
-                        // }
-                        // if (init_phase) {
-                            // TT_REPLAY(16, 7, 1, 1);
-                            bitonic_topk_ph0_st1_to_1();
+                        } else {
+                            TTI_REPLAY(0, 8, 0, 0);
+                        }
+                        if (init_phase) {
+                            load_replay_buf<16, 7, true>([] {
+                                bitonic_topk_ph0_st1_to_1();
+                            });
                             init_phase = false;
-                        // } else {
-                            // TT_REPLAY(16, 7, 0, 0);
-                        // }
-                        // if (init_store) {
-                            // TT_REPLAY(8, 8, 1, 1);
-                            bitonic_topk_store16<true>(4, 8);
+                        } else {
+                            TTI_REPLAY(16, 7, 0, 0);
+                        }
+                        if (init_store) {
+                            load_replay_buf<8, 8, true>([] {
+                                bitonic_topk_store16<true>(4, 8);
+                            });
                             init_store = false;
-                        // } else {
-                            // TT_REPLAY(8, 8, 0, 0);
-                        // }
+                        } else {
+                            TTI_REPLAY(8, 8, 0, 0);
+                        }
                         
                     }
                     break;
                 case 1:
                     for (int d=0; d<4; d++) {
                         // Groups of 16 datums being sorted at the same time
-                        // TT_REPLAY(0, 8, 0, 0);
-                        bitonic_topk_load16(4, 8);
-                        // if (init_phase) {
-                            // TT_REPLAY(16, 8, 1, 1);
-                            bitonic_topk_ph1_st2_to_1();
+                        TTI_REPLAY(0, 8, 0, 0);
+                        if (init_phase) {
+                            load_replay_buf<16, 8, true>([] {
+                                bitonic_topk_ph1_st2_to_1();
+                            });
                             init_phase = false;
-                        // } else {
-                            // TT_REPLAY(16, 8, 0, 0);
-                        // }
-                        // TT_REPLAY(8, 8, 0, 0);
-                        bitonic_topk_store16<true>(4, 8);
+                        } else {
+                            TTI_REPLAY(16, 8, 0, 0);
+                        }
+                        TTI_REPLAY(8, 8, 0, 0);
                     }
                     break;
                 case 2:
                     for (int d=0; d<4; d++) {
-                        // TT_REPLAY(0, 8, 0, 0);
-                        bitonic_topk_load16(4, 8);
-                        // if (init_phase) {
-                            // TT_REPLAY(16, 13, 1, 1);
-                            bitonic_topk_ph2_st3_to_1();
+                        TTI_REPLAY(0, 8, 0, 0);
+                        if (init_phase) {
+                            load_replay_buf<16, 13, true>([] {
+                                bitonic_topk_ph2_st3_to_1();
+                            });
                             init_phase = false;
-                        // } else {
-                            // TT_REPLAY(16, 13, 0, 0);
-                        // }
-                        // TT_REPLAY(8, 8, 0, 0);
-                        bitonic_topk_store16<true>(4, 8);
+                        } else {
+                            TTI_REPLAY(16, 13, 0, 0);
+                        }
+                        TTI_REPLAY(8, 8, 0, 0);
                     }
                     break;
                 case 3:
                     for (int d=0; d<4; d++) {
-                        // TT_REPLAY(0, 8, 0, 0);
-                        bitonic_topk_load16(4, 8);
+                        TTI_REPLAY(0, 8, 0, 0);
                         bitonic_topk_ph3_st4_to_1(dir, init_phase, 16);
-                        // TT_REPLAY(8, 8, 0, 0);
-                        bitonic_topk_store16<true>(4, 8);
+                        TTI_REPLAY(8, 8, 0, 0);
                         dir = !dir;
                     }
                     break;
@@ -382,11 +370,9 @@ inline void _bitonic_topk_phases_steps(
                     TTI_SETRWC(p_setrwc::CLR_NONE, 0, 0, 0, 0, p_setrwc::SET_D);
                     datums_compared = 0;
                     while (datums_compared < total_datums_to_compare) {
-                        // TT_REPLAY(0, 8, 0, 0);
-                        bitonic_topk_load16(4, 8);
+                        TTI_REPLAY(0, 8, 0, 0);
                         bitonic_topk_ph3_st4_to_1(dir, init_phase, 16);
-                        // TT_REPLAY(8, 8, 0, 0);
-                        bitonic_topk_store16<true>(4, 8);
+                        TTI_REPLAY(8, 8, 0, 0);
                         datums_compared += 16;
                         dir = (datums_compared == sorted_seq_length) ? !dir : dir;
                     }
@@ -469,16 +455,17 @@ inline void _bitonic_topk_rebuild(const bool idir, const int m_iter, const int k
                     if (m_iter >= 2) {
                         while (datums_compared < total_datums_to_compare) {
                             // Groups of 8 datums being sorted at the same time
-                            // if (init_rebuild) {
-                                // TT_REPLAY(0, 24, 1, 1);
-                                bitonic_topk_load8(0, ld_offset);
-                                bitonic_topk_ph1_st2_to_1();
-                                bitonic_topk_store8(0, ld_offset);
-                                bitonic_topk_inc_x8_dest(64,false);
+                            if (init_rebuild) {
+                                load_replay_buf<0, 24, true>([ld_offset] {
+                                    bitonic_topk_load8(0, ld_offset);
+                                    bitonic_topk_ph1_st2_to_1();
+                                    bitonic_topk_store8(0, ld_offset);
+                                    bitonic_topk_inc_x8_dest(64,false);
+                                });
                                 init_rebuild = false;
-                            // } else {
-                                // TT_REPLAY(0, 24, 0, 0);
-                            // }
+                            } else {
+                                TTI_REPLAY(0, 24, 0, 0);
+                            }
                             datums_compared += 16;
                         }
                         break;
@@ -486,19 +473,20 @@ inline void _bitonic_topk_rebuild(const bool idir, const int m_iter, const int k
                         ld_dist = (ld_offset < 16) ? 4*ld_offset : 2*ld_offset;
                         while (datums_compared < total_datums_to_compare) {
                             // Groups of 16 datums being sorted at the same time
-                            // if (init_rebuild) {
-                                // TT_REPLAY(0, 28, 1, 1);
-                                bitonic_topk_load16(ld_offset, ld_dist);
-                                bitonic_topk_ph1_st2_to_1();
-                                bitonic_topk_store16<true>(ld_offset, ld_dist);
-                                TTI_INCRWC(0, 8, 0, 0);
-                                TTI_INCRWC(0, 8, 0, 0);
-                                TTI_INCRWC(0, 8, 0, 0);
-                                TTI_INCRWC(0, 8, 0, 0);
+                            if (init_rebuild) {
+                                load_replay_buf<0, 28, true>([ld_offset, ld_dist] {
+                                    bitonic_topk_load16(ld_offset, ld_dist);
+                                    bitonic_topk_ph1_st2_to_1();
+                                    bitonic_topk_store16<true>(ld_offset, ld_dist);
+                                    TTI_INCRWC(0, 8, 0, 0);
+                                    TTI_INCRWC(0, 8, 0, 0);
+                                    TTI_INCRWC(0, 8, 0, 0);
+                                    TTI_INCRWC(0, 8, 0, 0);
+                                });
                                 init_rebuild = false;
-                            // } else {
-                                // TT_REPLAY(0, 28, 0, 0);
-                            // }
+                            } else {
+                                TTI_REPLAY(0, 28, 0, 0);
+                            }
                             datums_compared += 16;
                         }
                         break;
@@ -506,41 +494,44 @@ inline void _bitonic_topk_rebuild(const bool idir, const int m_iter, const int k
                 case 2:
                     while (datums_compared < total_datums_to_compare) {
                         // Groups of 16 datums being sorted at the same time
-                        // if (init_rebuild) {
-                            // TT_REPLAY(0, 32, 1, 1);
-                            bitonic_topk_load16(4, ld_offset);
-                            bitonic_topk_ph2_st3_to_1();
-                            bitonic_topk_store16<true>(4, ld_offset);
-                            TTI_INCRWC(0, 8, 0, 0);
-                            TTI_INCRWC(0, 8, 0, 0);
-                            TTI_INCRWC(0, 8, 0, 0);
-                            TTI_INCRWC(0, 8, 0, 0);
+                        if (init_rebuild) {
+                            load_replay_buf<0, 32, true>([ld_offset] {
+                                bitonic_topk_load16(4, ld_offset);
+                                bitonic_topk_ph2_st3_to_1();
+                                bitonic_topk_store16<true>(4, ld_offset);
+                                TTI_INCRWC(0, 8, 0, 0);
+                                TTI_INCRWC(0, 8, 0, 0);
+                                TTI_INCRWC(0, 8, 0, 0);
+                                TTI_INCRWC(0, 8, 0, 0);
+                            });
                             init_rebuild = false;
-                        // } else {
-                            // TT_REPLAY(0, 32, 0, 0);
-                            // TTI_INCRWC(0, 8, 0, 0);
-                        // }
+                        } else {
+                            TTI_REPLAY(0, 32, 0, 0);
+                            TTI_INCRWC(0, 8, 0, 0);
+                        }
                         datums_compared += 16;
                     }
                     break;
                 case 3:
                     while (datums_compared < total_datums_to_compare) {
                         // Groups of 16 datums being sorted at the same time
-                        // if (init_rebuild) {
-                            // TT_REPLAY(0, 8, 1, 1);
-                            bitonic_topk_load16(4, 8);
+                        if (init_rebuild) {
+                            load_replay_buf<0, 8, true>([] {
+                                bitonic_topk_load16(4, 8);
+                            });
                             bitonic_topk_ph3_st4_to_1(dir, init_rebuild, 8);
-                            // TT_REPLAY(15, 12, 1, 1);
-                            bitonic_topk_store16<true>(4, 8);
-                            TTI_INCRWC(0, 8, 0, 0);
-                            TTI_INCRWC(0, 8, 0, 0);
-                            TTI_INCRWC(0, 8, 0, 0);
-                            TTI_INCRWC(0, 8, 0, 0);
-                        // } else {
-                            // TT_REPLAY(0, 8, 0, 0);
-                            // bitonic_topk_ph3_st4_to_1(dir, init_rebuild, 8);
-                            // TT_REPLAY(15, 12, 0, 0);
-                        // }
+                            load_replay_buf<15, 12, true>([] {
+                                bitonic_topk_store16<true>(4, 8);
+                                TTI_INCRWC(0, 8, 0, 0);
+                                TTI_INCRWC(0, 8, 0, 0);
+                                TTI_INCRWC(0, 8, 0, 0);
+                                TTI_INCRWC(0, 8, 0, 0);
+                            });
+                        } else {
+                            TTI_REPLAY(0, 8, 0, 0);
+                            bitonic_topk_ph3_st4_to_1(dir, init_rebuild, 8);
+                            TTI_REPLAY(15, 12, 0, 0);
+                        }
                         datums_compared += 16;
                         dir = !dir;
                     }
@@ -586,17 +577,19 @@ inline void _bitonic_topk_rebuild(const bool idir, const int m_iter, const int k
                     datums_compared = 0;
                     TTI_SETRWC(p_setrwc::CLR_NONE, 0, 0, 0, 0, p_setrwc::SET_D);
                     while (datums_compared < total_datums_to_compare) {
-                        // if (init_rebuild) {
-                            // TT_REPLAY(0, 8, 1, 1);
-                            bitonic_topk_load16(4, 8);
+                        if (init_rebuild) {
+                            load_replay_buf<0, 8, true>([] {
+                                bitonic_topk_load16(4, 8);
+                            });
                             bitonic_topk_ph3_st4_to_1(dir, init_rebuild, 8);
-                            // TT_REPLAY(15, 8, 1, 1);
-                            bitonic_topk_store16<true>(4, 8);
-                        // } else {
-                            // TT_REPLAY(0, 8, 0, 0);
-                            // bitonic_topk_ph3_st4_to_1(dir, init_rebuild, 8);
-                            // TT_REPLAY(15, 8, 0, 0);
-                        // }
+                            load_replay_buf<15, 8, true>([] {
+                                bitonic_topk_store16<true>(4, 8);
+                            });
+                        } else {
+                            TTI_REPLAY(0, 8, 0, 0);
+                            bitonic_topk_ph3_st4_to_1(dir, init_rebuild, 8);
+                            TTI_REPLAY(15, 8, 0, 0);
+                        }
                         datums_compared += 16;
                         dir = (datums_compared == sorted_seq_length) ? !dir : dir;
                     }
