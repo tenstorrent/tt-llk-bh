@@ -14,12 +14,11 @@
 
 using namespace ckernel::math;
 
-template <bool untilize_en>
 inline void _llk_math_hw_configure() {
     //Untilize mode needs dest read access with a stride of 16
     //Following bits are needed for enabling stride of 16
-    cfg_reg_rmw_tensix<DEST_ACCESS_CFG_remap_addrs_RMW>(untilize_en);
-    cfg_reg_rmw_tensix<DEST_ACCESS_CFG_swizzle_32b_RMW>(untilize_en);
+    cfg_reg_rmw_tensix<DEST_ACCESS_CFG_remap_addrs_RMW>(1);
+    cfg_reg_rmw_tensix<DEST_ACCESS_CFG_swizzle_32b_RMW>(1);
     
     // Legacy mode for ZEROACC 
     cfg_reg_rmw_tensix<DEST_ACCESS_CFG_zeroacc_absolute_tile_mode_RMW>(1);
