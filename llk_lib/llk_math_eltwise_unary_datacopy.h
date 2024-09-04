@@ -21,10 +21,12 @@ template <DataCopyType type, BroadcastType src_b_bcast_type = BroadcastType::NON
 inline void _llk_math_eltwise_unary_datacopy_(const std::uint32_t dst_index, const std::uint32_t src_format, const std::uint32_t dst_format) {
 
     if (unpack_to_dest && is_32bit_input(src_format, dst_format)) {
-#if SKIP_UNP == 1 
+#if SKIP_UNP == 1
 #else
         math_unpack_to_dest_math_ready();
+        //TT_LOG("This print solves PCC error");
         math::set_dst_write_addr<DstTileLayout::Default, DstTileShape::Tile32x32, true>(dst_index);
+        TT_LOG("This print DOES NOT solve PCC error");
         math::math_unpack_to_dest_tile_ready();
 #endif
     } else {
