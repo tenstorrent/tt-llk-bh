@@ -272,8 +272,8 @@ namespace ckernel::unpacker
 
       uint32_t src_zeroflags_disable = ((uint)unpA_dst_format == (uint)DataFormat::UInt16) || ((uint)unpB_dst_format == (uint)DataFormat::UInt16);
       cfg_reg_rmw_tensix<ALU_ACC_CTRL_Zero_Flag_disabled_src_RMW>(src_zeroflags_disable);
-      
-      //Set FP8 E4M3 mode, bit is accessible by unpacker/packer 
+
+      //Set FP8 E4M3 mode, bit is accessible by unpacker/packer
       if((unpA_src_format&0x1F) == (uint)DataFormat::Fp8_e4m3) {
         cfg_reg_rmw_tensix<THCON_SEC0_REG1_Unp_LF8_4b_exp_RMW>(1);
       }
@@ -441,6 +441,14 @@ namespace ckernel::unpacker
 
    inline void unpack_to_dest_tile_done(uint &context_id) {
       t6_semaphore_post<p_stall::UNPACK0>(semaphore::UNPACK_TO_DEST);
+
+      // Due to bug in Blackhole Tensix (budabackend/#2730) when an event with side effect of clearing DEST zero flags
+      // (such as Unpack-to-dest or RISC-to-dest) and a ZEROACC instruction from packer occur in the same cycle,
+      // zero flags clearing is dropped.
+      // To mitigate that, we issue additional zero flag clear instruction immediatelly after unpack tile to dest is done.
+      // RISC-to-dest event is not currently used.
+      TT_ZEROACC(0b10, 0, 1 /*clear zero flags*/, 0, context_id);
+
       TTI_WRCFG(p_gpr_unpack::UNPACK_STRIDE, p_cfg::WRCFG_32b, UNP0_ADDR_CTRL_ZW_REG_1_Zstride_ADDR32); // Restore unpack stride
       // Restore config context
       if (context_id == 0) {
