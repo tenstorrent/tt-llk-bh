@@ -159,10 +159,6 @@ inline void _llk_pack_mop_config_(const std::uint32_t pack_dst_format, const std
             }
         );
 
-        // ckernel::ckernel_template tmp(MOP_OUTER_LOOP, MOP_INNER_LOOP, TTI_PACR(p_pacr::CFG_CTXT_0, p_pacr::NO_ROW_PAD_ZERO, p_pacr::DST_ACCESS_NORMAL_MODE, ADDR_MOD_0, p_pacr::ADDR_CNT_CTXT_0, ZERO_OUTPUT_FLAG, PACK_INTF_SEL_0, 0, MEGAROW, p_pacr::NO_CTXT_CTRL, 0, 0));
-        // tmp.set_last_inner_loop_instr(TTI_PACR(p_pacr::CFG_CTXT_0, p_pacr::NO_ROW_PAD_ZERO, p_pacr::DST_ACCESS_NORMAL_MODE, ADDR_MOD_1, p_pacr::ADDR_CNT_CTXT_0, ZERO_OUTPUT_FLAG, PACK_INTF_SEL_0, 0, MEGAROW, p_pacr::NO_CTXT_CTRL, 0, 0));
-        // tmp.set_last_outer_loop_instr(TTI_PACR(p_pacr::CFG_CTXT_0, p_pacr::NO_ROW_PAD_ZERO, p_pacr::DST_ACCESS_NORMAL_MODE, ADDR_MOD_0, p_pacr::ADDR_CNT_CTXT_0, ZERO_OUTPUT_FLAG, PACK_INTF_SEL_1, 0, MEGAROW, p_pacr::NO_CTXT_CTRL, 0, 0));
-
         ckernel::ckernel_template tmp(
             MOP_OUTER_LOOP,
             MOP_INNER_LOOP,
