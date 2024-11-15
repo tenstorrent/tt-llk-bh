@@ -78,7 +78,7 @@ inline void _llk_unpack_tilize_init_(const std::uint32_t unpack_src_format=0, co
     //Force x-dim to 1024
     cfg_reg_rmw_tensix<THCON_SEC0_REG0_TileDescriptor_ADDR32, 0, 0xffff0000>(0 | (Tile_x_dim<<16));
     //Force z-dim to CNT_ZDIM/4
-    cfg_reg_rmw_tensix<THCON_SEC0_REG0_TileDescriptor_ADDR32+1, 0, 0xffff0000>(0 | (Tile_z_dim<<16));
+    //cfg_reg_rmw_tensix<THCON_SEC0_REG0_TileDescriptor_ADDR32+1, 0, 0xffff0000>(0 | (Tile_z_dim<<16));
 
     //Force x-end for Unpackers to 1024
     TTI_SETADCXX(p_setadc::UNP0, 1023, 0x0);
