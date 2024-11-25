@@ -14,7 +14,6 @@
 using namespace ckernel;
 using namespace ckernel::packer;
 
-#include "debug/dprint.h"
 template <bool diagonal = false>
 inline void _llk_pack_untilize_configure_addrmod_() {
     static_assert(!diagonal, "Diagonal not supported");
