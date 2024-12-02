@@ -1,3 +1,6 @@
 [submodule "tests/sfpi-rel"]
 	path = tests/sfpi-rel
 	url = https://github.com/tenstorrent/sfpi-rel.git
+[submodule "tests/tests/sfpi-rel"]
+	path = tests/tests/sfpi-rel
+	url = https://github.com/tenstorrent/sfpi

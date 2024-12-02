@@ -76,7 +76,7 @@ def write_stimuli_to_l1(buffer_A, buffer_B, stimuli_format):
 @pytest.mark.parametrize("format", ["Bfp8_b", "Float16_b", "Float16"])
 @pytest.mark.parametrize("testname", ["eltwise_binary_test"])
 @pytest.mark.parametrize("mathop", ["elwadd", "elwsub", "elwmul"])
-@pytest.mark.parametrize("machine", ["wormhole"])
+@pytest.mark.parametrize("machine", ["blackhole"])
 def test_all(format, mathop, testname, machine):
     #context = init_debuda()
     src_A, src_B = generate_stimuli(format)
