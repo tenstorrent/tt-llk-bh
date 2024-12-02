@@ -5,7 +5,7 @@ git submodule add https://github.com/tenstorrent/sfpi sfpi-rel
 git submodule sync
 git submodule update --init --recursive
 # **************** DOWNLOAD & INSTALL DEBUDA ****************************
-pip install git+https://github.com/tenstorrent/tt-debuda.git@195c4e4c2ac8d92c7f96ddd31f0621f871919c28
+pip install git+https://github.com/tenstorrent/tt-debuda.git@d4ce04c3d4e68cccdf0f53b0b5748680a8a573ed
 # **************** SETUP PYTHON VENV **********************************
 
 # Try to install python3.10-venv first, fallback to python3.8-venv if it fails
