@@ -7,7 +7,7 @@
 
 #include "ckernel.h"
 #include "ckernel_defs.h"
-#include "fw_debug.h"
+//#include "fw_debug.h"
 #include "cpack_common.h"
 #include "llk_defs.h"
 

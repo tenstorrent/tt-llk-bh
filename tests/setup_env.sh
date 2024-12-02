@@ -1,0 +1,36 @@
+#!/bin/bash
+
+# **************** DOWNLOAD & INSTALL SFPI ****************************
+git submodule add https://github.com/tenstorrent/sfpi-rel.git tests/sfpi-rel
+git submodule sync
+git submodule update --init --recursive
+# **************** DOWNLOAD & INSTALL DEBUDA ****************************
+pip install git+https://github.com/tenstorrent/tt-debuda.git@195c4e4c2ac8d92c7f96ddd31f0621f871919c28
+# **************** SETUP PYTHON VENV **********************************
+
+# Try to install python3.10-venv first, fallback to python3.8-venv if it fails
+sudo apt install -y python3.10-venv || {
+    echo "Failed to install python3.10-venv, trying python3.8-venv...";
+    sudo apt install -y python3.8-venv || { echo "Failed to install python3.8-venv."; exit 1; }
+}
+
+set -eo pipefail
+
+if [ -z "$PYTHON_ENV_DIR" ]; then
+    PYTHON_ENV_DIR="$(pwd)/.venv"
+fi
+
+echo "Creating virtual env in: $PYTHON_ENV_DIR"
+python3 -m venv "$PYTHON_ENV_DIR"
+
+source "$PYTHON_ENV_DIR/bin/activate"
+
+echo "Ensuring pip is installed and up-to-date"
+python3 -m ensurepip
+pip install --upgrade pip
+
+# needed packages
+pip install -U pytest
+pip install pytest-cov
+pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cpu || { echo "Failed to install PyTorch packages."; exit 1; }
+
