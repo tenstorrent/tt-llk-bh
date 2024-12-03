@@ -1,9 +1,15 @@
 #!/bin/bash
 
+sudo apt update
+sudo apt install gawk
+
 # **************** DOWNLOAD & INSTALL SFPI ****************************
-git submodule add https://github.com/tenstorrent/sfpi sfpi
-git submodule sync
-git submodule update --init --recursive
+#git submodule add https://github.com/tenstorrent/sfpi sfpi
+#git submodule sync
+#git submodule update --init --recursive
+wget https://github.com/tenstorrent/sfpi/releases/download/v6.0.0/sfpi-release.tgz
+tar -xzvf sfpi-release.tgz 
+
 # **************** DOWNLOAD & INSTALL DEBUDA ****************************
 pip install git+https://github.com/tenstorrent/tt-debuda.git@d4ce04c3d4e68cccdf0f53b0b5748680a8a573ed
 # **************** SETUP PYTHON VENV **********************************
