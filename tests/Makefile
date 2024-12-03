@@ -1,4 +1,4 @@
-TOOL_PATH?=sfpi-rel/compiler/bin
+TOOL_PATH?=sfpi/compiler/bin
 BUILD_DIR ?=build
 
 # Tool paths
@@ -8,11 +8,11 @@ OBJCOPY=$(TOOL_PATH)/riscv32-unknown-elf-objcopy
 READELF=$(TOOL_PATH)/riscv32-unknown-elf-readelf
 
 # GCC options
-OPTIONS_ALL=-O3 -march=rv32imw -mtune=rvtt-b1 -mabi=ilp32 -std=c++17 -g -ffast-math -flto
+OPTIONS_ALL=-O3 -march=rv32im_xttbh -mtune=rvtt-b1 -mabi=ilp32 -std=c++17 -g -ffast-math -flto
 OPTIONS_COMPILE=-fno-use-cxa-atexit -Wall -Werror -Wno-unknown-pragmas -Wno-error=multistatement-macros -Wno-error=parentheses -Wno-error=unused-but-set-variable -Wno-unused-variable -DARCH_BLACKHOLE -DTENSIX_FIRMWARE -DDEBUG_PRINT_ENABLED -fexceptions
 OPTIONS_LINK=-fno-exceptions -Wl,-z,max-page-size=16 -Wl,-z,common-page-size=16 -nostartfiles -L../dbd/riscv-src -Wl,--trace
 INCLUDES = -I../llk_lib -I../common/inc -I../common/inc/sfpu
-INCLUDES += -Isfpi-rel/include/blackhole -Isfpi-rel/include/  -I../firmware/riscv/common -I../firmware/riscv/blackhole -I../firmware/riscv/blackhole/noc 
+INCLUDES += -Isfpi/include/blackhole -Isfpi/include/  -I../firmware/riscv/common -I../firmware/riscv/blackhole -I../firmware/riscv/blackhole/noc 
 
 FORMAT_ARG:=-D$(format) 
 
@@ -61,7 +61,6 @@ endif
 
 OPTIONS_COMPILE+=$(FORMAT_ARG) $(MATHOP_ARG)
 OPTIONS_COMPILE+=$(INCLUDES)
-OPTIONS_ALL+=-m$(machine)
 
 # Define project paths
 RISCV_SOURCE=helpers

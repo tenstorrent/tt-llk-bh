@@ -9,7 +9,7 @@ sudo apt install gawk
 #git submodule update --init --recursive
 wget https://github.com/tenstorrent/sfpi/releases/download/v6.0.0/sfpi-release.tgz
 tar -xzvf sfpi-release.tgz 
-
+rm -rf sfpi-release.tgz 
 # **************** DOWNLOAD & INSTALL DEBUDA ****************************
 pip install git+https://github.com/tenstorrent/tt-debuda.git@d4ce04c3d4e68cccdf0f53b0b5748680a8a573ed
 # **************** SETUP PYTHON VENV **********************************

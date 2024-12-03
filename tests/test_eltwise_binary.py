@@ -76,14 +76,13 @@ def write_stimuli_to_l1(buffer_A, buffer_B, stimuli_format):
 @pytest.mark.parametrize("format", ["Bfp8_b", "Float16_b", "Float16"])
 @pytest.mark.parametrize("testname", ["eltwise_binary_test"])
 @pytest.mark.parametrize("mathop", ["elwadd", "elwsub", "elwmul"])
-@pytest.mark.parametrize("machine", ["blackhole"])
-def test_all(format, mathop, testname, machine):
+def test_all(format, mathop, testname):
     #context = init_debuda()
     src_A, src_B = generate_stimuli(format)
     golden = generate_golden(mathop, src_A, src_B, format)
     write_stimuli_to_l1(src_A, src_B, format)
 
-    make_cmd = f"make --silent format={format_args_dict[format]} mathop={mathop_args_dict[mathop]} testname={testname} machine={machine}"
+    make_cmd = f"make --silent format={format_args_dict[format]} mathop={mathop_args_dict[mathop]} testname={testname}"
     os.system(make_cmd)
 
     for i in range(3):
