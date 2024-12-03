@@ -1,0 +1,3 @@
+[submodule "sfpi"]
+	path = tests/sfpi-rel
+	url = https://github.com/tenstorrent/sfpi

@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # **************** DOWNLOAD & INSTALL SFPI ****************************
-git submodule add https://github.com/tenstorrent/sfpi sfpi-rel
+git submodule add https://github.com/tenstorrent/sfpi sfpi
 git submodule sync
 git submodule update --init --recursive
 # **************** DOWNLOAD & INSTALL DEBUDA ****************************
