@@ -8,7 +8,11 @@
     inline void pack_init(){
         _llk_pack_hw_configure_(DATA_FORMAT, DATA_FORMAT, 16*16*4);
         _llk_pack_init_<false, false, DstTileFaceLayout::RowMajor, false>(DATA_FORMAT);
+        #ifdef ARCH_BLACKHOLE
+        _llk_pack_dest_init_<DstSync::SyncFull,DstTileFaceLayout::RowMajor,false>();
+        #else
         _llk_pack_dest_init_<DstSync::SyncFull, DstTileFaceLayout::RowMajor, false, false>();
+        #endif
     }
 
     void pack_Dest_kernel(int index){ 
