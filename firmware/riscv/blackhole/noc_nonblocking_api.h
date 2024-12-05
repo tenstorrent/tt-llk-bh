@@ -7,7 +7,13 @@
 #include <stdint.h>
 
 #include "noc_parameters.h"
-#include "dev_msgs.h"
+//#include "dev_msgs.h"
+
+enum noc_mode : uint8_t {
+    DM_DEDICATED_NOC = 0,
+    DM_DYNAMIC_NOC = 1,
+    DM_INVALID_NOC = 2,
+};
 
 // Helper functions to convert NoC coordinates to NoC-0 coordinates, used in metal as "physical" coordinates.
 #define NOC_0_X(noc_index, noc_size_x, x) (noc_index == 0 ? (x) : (noc_size_x-1-(x)))

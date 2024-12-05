@@ -9,7 +9,7 @@ READELF=$(TOOL_PATH)/riscv32-unknown-elf-readelf
 
 # GCC options
 OPTIONS_ALL=-O3 -mabi=ilp32 -std=c++17 -g -ffast-math -flto
-OPTIONS_COMPILE=-fno-use-cxa-atexit -fexceptions -Wall -Werror -Wno-unknown-pragmas -Wno-error=multistatement-macros -Wno-error=parentheses -Wno-error=unused-but-set-variable -Wno-unused-variable -DTENSIX_FIRMWARE -DDEBUG_PRINT_ENABLED
+OPTIONS_COMPILE = -fno-use-cxa-atexit -Wall -fno-exceptions -fno-rtti -Werror -Wno-unknown-pragmas -Wno-error=multistatement-macros -Wno-error=parentheses -Wno-error=unused-but-set-variable -Wno-unused-variable -DTENSIX_FIRMWARE -DDEBUG_PRINT_ENABLED
 
 ifeq ($(CHIP_ARCH),wormhole)
 	OPTIONS_ALL+=-mcpu=tt-wh
@@ -21,9 +21,9 @@ else
     $(info CHIP_ARCH is neither wormhole nor blackhole.)
 endif
 
-OPTIONS_LINK=-fexceptions -Wl,-z,max-page-size=16 -Wl,-z,common-page-size=16 -nostartfiles -Wl,--trace
+OPTIONS_LINK=-fexceptions -Wl,-z,max-page-size=16 -Wl,-z,common-page-size=16 -nostartfiles -Wl,--trace -lstdc++
 INCLUDES = -I../llk_lib -I../common/inc -I../common/inc/sfpu
-INCLUDES += -I../firmware/riscv/common -I../firmware/riscv/$(CHIP_ARCH) -I../firmware/riscv/$(CHIP_ARCH)/wormhole_b0_defines -I../firmware/riscv/$(CHIP_ARCH)/noc -Isfpi/include
+INCLUDES += -I../firmware/riscv/common -I../firmware/riscv/$(CHIP_ARCH) -Isfpi/include
 
 FORMAT_ARG:=-D$(format) 
 
