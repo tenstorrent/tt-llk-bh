@@ -35,9 +35,7 @@ void run_kernel()
 #ifdef LLK_TRISC_MATH
 
 #include "llk_math_eltwise_unary_datacopy.h"
-#include "ckernel_sfpu.h"
 #include "llk_math_common.h"
-#include "llk_math_eltwise_unary_sfpu.h"
 #include "../helpers/params.h"
 
 using namespace ckernel;
