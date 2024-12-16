@@ -81,13 +81,13 @@ inline void _llk_math_eltwise_binary_(const std::uint32_t num_faces, uint dst_in
             // Mop for col broadcast only does 2 outerloops.  Needs to clear B manually and call twice
             constexpr uint32_t outerloop = (binary_reuse_dest != EltwiseBinaryReuseDestType::NONE) ? 2 : 1;
 #pragma GCC unroll 0
-            for (std::uint32_t n = 0; n < outerloop; n++) {  // N-num faces
+            for (std::uint32_t face_num = 0; face_num< outerloop; face_num++) {  // N-num faces
                 eltwise_binary_reuse_dest_as_src<binary_reuse_dest>();
                 ckernel_template::run(instrn_buffer);
             }
             TTI_SETRWC(p_setrwc::CLR_B, 0, 0, 0, 0, 0);
 #pragma GCC unroll 0
-            for (std::uint32_t n = 0; n < outerloop; n++) {  // N-num faces
+            for (std::uint32_t face_num = 0; face_num< outerloop; face_num++) {  // N-num faces
                 eltwise_binary_reuse_dest_as_src<binary_reuse_dest>();
                 ckernel_template::run(instrn_buffer);
             }
@@ -95,7 +95,7 @@ inline void _llk_math_eltwise_binary_(const std::uint32_t num_faces, uint dst_in
         } else {
             constexpr uint32_t outerloop = (binary_reuse_dest != EltwiseBinaryReuseDestType::NONE) ? 4 : 1;
 #pragma GCC unroll 0
-            for (std::uint32_t n = 0; n < outerloop; n++) {  // N-num faces
+            for (std::uint32_t face_num = 0; face_num< outerloop; face_num++) {  // N-num faces
                 eltwise_binary_reuse_dest_as_src<binary_reuse_dest>();
                 ckernel_template::run(instrn_buffer);
             }
@@ -110,26 +110,28 @@ inline void _llk_math_eltwise_binary_(const std::uint32_t num_faces, uint dst_in
             constexpr uint32_t outerloop = (binary_reuse_dest != EltwiseBinaryReuseDestType::NONE) ? 2 : 1;
             if constexpr (high_fidelity) {
 #pragma GCC unroll 0
-                for (std::uint32_t n = 0; n < 2; n++) {  // N-num faces
+                for (std::uint32_t face_num = 0; face_num < 2; face_num++) {  // N-num faces
                     eltwise_binary_reuse_dest_as_src<binary_reuse_dest>();
                     if constexpr (binary_reuse_dest != EltwiseBinaryReuseDestType::NONE) {
+                        // We clear the DEST face-by-face, given the DEST base, tile index and face index
                         if (is_fp32_dest_acc_en && clear_fp32_dst_acc) {
-                            TT_ZEROACC(ZERO_ACC_MODE, 1/*clear fp32*/, 0, ADDR_MOD_1, ((get_dest_buffer_base() >> 5) + (dst_index << 2)) + (0 + n)); // Clear faces 0 & 1
+                            TT_ZEROACC(ZERO_ACC_MODE, 1/*clear fp32*/, 0, ADDR_MOD_1, (get_dest_buffer_base_32b() + get_dest_index_in_faces(dst_index, (0 + face_num)))); // Clear faces 0 & 1
                         } else {
-                            TT_ZEROACC(ZERO_ACC_MODE, 0/*clear fp32*/, 0, ADDR_MOD_1, ((get_dest_buffer_base() >> 4) + (dst_index << 2)) + (0 + n)); // Clear faces 0 & 1
+                            TT_ZEROACC(ZERO_ACC_MODE, 0/*clear fp32*/, 0, ADDR_MOD_1, (get_dest_buffer_base_16b() + get_dest_index_in_faces(dst_index, (0 + face_num)))); // Clear faces 0 & 1
                         }
                     }
                     ckernel_template::run(instrn_buffer);
                 }
             } else {
 #pragma GCC unroll 0
-                for (std::uint32_t n = 0; n < outerloop; n++) {  // N-num faces
+                for (std::uint32_t face_num = 0; face_num< outerloop; face_num++) {  // N-num faces
                     eltwise_binary_reuse_dest_as_src<binary_reuse_dest>();
                     if constexpr (binary_reuse_dest != EltwiseBinaryReuseDestType::NONE) {
+                        // We clear the DEST face-by-face, given the DEST base, tile index and face index
                         if (is_fp32_dest_acc_en && clear_fp32_dst_acc) {
-                            TT_ZEROACC(ZERO_ACC_MODE, 1/*clear fp32*/, 0, ADDR_MOD_1, ((get_dest_buffer_base() >> 5) + (dst_index << 2)) + (0 + n)); // Clear faces 0 & 1
+                            TT_ZEROACC(ZERO_ACC_MODE, 1/*clear fp32*/, 0, ADDR_MOD_1, (get_dest_buffer_base_32b() + get_dest_index_in_faces(dst_index, (0 + face_num)))); // Clear faces 0 & 1
                         } else {
-                            TT_ZEROACC(ZERO_ACC_MODE, 0/*clear fp32*/, 0, ADDR_MOD_1, ((get_dest_buffer_base() >> 4) + (dst_index << 2)) + (0 + n)); // Clear faces 0 & 1
+                            TT_ZEROACC(ZERO_ACC_MODE, 0/*clear fp32*/, 0, ADDR_MOD_1, (get_dest_buffer_base_16b() + get_dest_index_in_faces(dst_index, (0 + face_num)))); // Clear faces 0 & 1
                         }
                     }
                     ckernel_template::run(instrn_buffer);
@@ -138,26 +140,28 @@ inline void _llk_math_eltwise_binary_(const std::uint32_t num_faces, uint dst_in
             TTI_SETRWC(p_setrwc::CLR_B, 0, 0, 0, 0, 0);
             if constexpr (high_fidelity) {
 #pragma GCC unroll 0
-                for (std::uint32_t n = 0; n < 2; n++) {  // N-num faces
+                for (std::uint32_t face_num = 0; face_num < 2; face_num++) {  // N-num faces
                     eltwise_binary_reuse_dest_as_src<binary_reuse_dest>();
                     if constexpr (binary_reuse_dest != EltwiseBinaryReuseDestType::NONE) {
+                        // We clear the DEST face-by-face, given the DEST base, tile index and face index
                         if (is_fp32_dest_acc_en && clear_fp32_dst_acc) {
-                            TT_ZEROACC(ZERO_ACC_MODE, 1/*clear fp32*/, 0, ADDR_MOD_1, ((get_dest_buffer_base() >> 5) + (dst_index << 2)) + (2 + n)); // Clear faces 2 & 3
+                            TT_ZEROACC(ZERO_ACC_MODE, 1/*clear fp32*/, 0, ADDR_MOD_1, (get_dest_buffer_base_32b() + get_dest_index_in_faces(dst_index, (2 + face_num)))); // Clear faces 2 & 3
                         } else {
-                            TT_ZEROACC(ZERO_ACC_MODE, 0/*clear fp32*/, 0, ADDR_MOD_1, ((get_dest_buffer_base() >> 4) + (dst_index << 2)) + (2 + n)); // Clear faces 2 & 3
+                            TT_ZEROACC(ZERO_ACC_MODE, 0/*clear fp32*/, 0, ADDR_MOD_1, (get_dest_buffer_base_16b() + get_dest_index_in_faces(dst_index, (2 + face_num)))); // Clear faces 2 & 3
                         }
                     }
                     ckernel_template::run(instrn_buffer);
                 }
             } else {
 #pragma GCC unroll 0
-                for (std::uint32_t n = 0; n < outerloop; n++) {  // N-num faces
+                for (std::uint32_t face_num = 0; face_num< outerloop; face_num++) {  // N-num faces
                     eltwise_binary_reuse_dest_as_src<binary_reuse_dest>();
                     if constexpr (binary_reuse_dest != EltwiseBinaryReuseDestType::NONE) {
+                        // We clear the DEST face-by-face, given the DEST base, tile index and face index
                         if (is_fp32_dest_acc_en && clear_fp32_dst_acc) {
-                            TT_ZEROACC(ZERO_ACC_MODE, 1/*clear fp32*/, 0, ADDR_MOD_1, ((get_dest_buffer_base() >> 5) + (dst_index << 2)) + (2 + n)); // Clear faces 2 & 3
+                            TT_ZEROACC(ZERO_ACC_MODE, 1/*clear fp32*/, 0, ADDR_MOD_1, (get_dest_buffer_base_32b() + get_dest_index_in_faces(dst_index, (2 + face_num)))); // Clear faces 2 & 3
                         } else {
-                            TT_ZEROACC(ZERO_ACC_MODE, 0/*clear fp32*/, 0, ADDR_MOD_1, ((get_dest_buffer_base() >> 4) + (dst_index << 2)) + (2 + n)); // Clear faces 2 & 3
+                            TT_ZEROACC(ZERO_ACC_MODE, 0/*clear fp32*/, 0, ADDR_MOD_1, (get_dest_buffer_base_16b() + get_dest_index_in_faces(dst_index, (2 + face_num)))); // Clear faces 2 & 3
                         }
                     }
                     ckernel_template::run(instrn_buffer);
@@ -169,26 +173,28 @@ inline void _llk_math_eltwise_binary_(const std::uint32_t num_faces, uint dst_in
             const uint32_t outerloop = (binary_reuse_dest != EltwiseBinaryReuseDestType::NONE) ? num_faces : 1;
             if constexpr (high_fidelity) {
 #pragma GCC unroll 0
-                for (std::uint32_t n = 0; n < num_faces; n++) {  // N-num faces
+                for (std::uint32_t face_num = 0; face_num < num_faces; face_num++) {  // N-num faces
                     eltwise_binary_reuse_dest_as_src<binary_reuse_dest>();
                     if constexpr (binary_reuse_dest != EltwiseBinaryReuseDestType::NONE) {
+                        // We clear the DEST face-by-face, given the DEST base, tile index and face index
                         if (is_fp32_dest_acc_en && clear_fp32_dst_acc) {
-                            TT_ZEROACC(ZERO_ACC_MODE, 1/*clear fp32*/, 0, ADDR_MOD_1, ((get_dest_buffer_base() >> 5) + (dst_index << 2)) + n);
+                            TT_ZEROACC(ZERO_ACC_MODE, 1/*clear fp32*/, 0, ADDR_MOD_1, (get_dest_buffer_base_32b() + get_dest_index_in_faces(dst_index, face_num)));
                         } else {
-                            TT_ZEROACC(ZERO_ACC_MODE, 0/*clear fp32*/, 0, ADDR_MOD_1, ((get_dest_buffer_base() >> 4) + (dst_index << 2)) + n);
+                            TT_ZEROACC(ZERO_ACC_MODE, 0/*clear fp32*/, 0, ADDR_MOD_1, (get_dest_buffer_base_16b() + get_dest_index_in_faces(dst_index, face_num)));
                         }
                     }
                     ckernel_template::run(instrn_buffer);
                 }
             } else {
 #pragma GCC unroll 0
-                for (std::uint32_t n = 0; n < outerloop; n++) {  // N-num faces
+                for (std::uint32_t face_num = 0; face_num< outerloop; face_num++) {  // N-num faces
                     eltwise_binary_reuse_dest_as_src<binary_reuse_dest>();
                     if constexpr (binary_reuse_dest != EltwiseBinaryReuseDestType::NONE) {
+                        // We clear the DEST face-by-face, given the DEST base, tile index and face index
                         if (is_fp32_dest_acc_en && clear_fp32_dst_acc) {
-                            TT_ZEROACC(ZERO_ACC_MODE, 1/*clear fp32*/, 0, ADDR_MOD_1, ((get_dest_buffer_base() >> 5) + (dst_index << 2)) + n);
+                            TT_ZEROACC(ZERO_ACC_MODE, 1/*clear fp32*/, 0, ADDR_MOD_1, (get_dest_buffer_base_32b() + get_dest_index_in_faces(dst_index, face_num)));
                         } else {
-                            TT_ZEROACC(ZERO_ACC_MODE, 0/*clear fp32*/, 0, ADDR_MOD_1, ((get_dest_buffer_base() >> 4) + (dst_index << 2)) + n);
+                            TT_ZEROACC(ZERO_ACC_MODE, 0/*clear fp32*/, 0, ADDR_MOD_1, (get_dest_buffer_base_16b() + get_dest_index_in_faces(dst_index, face_num)));
                         }
                     }
                     ckernel_template::run(instrn_buffer);
