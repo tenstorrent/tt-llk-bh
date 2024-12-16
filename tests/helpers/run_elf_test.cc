@@ -34,6 +34,11 @@ int main()
     //FWEVENT("Launching proudction env kernels");
 	for (int i = 0; i < 64; i++) regfile[i] = 0;
 	reset_cfg_state_id();
+	reset_dest_offset_id();
+
+	#ifdef LLK_TRISC_MATH
+    TT_ZEROACC(p_zeroacc::CLR_ALL, 0, 0, 1, 0);
+	#endif
 
 	#ifdef MULTIPLE_OPS
 	// needs these 2 defines when compiling
