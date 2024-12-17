@@ -6,22 +6,7 @@ from ttlens.tt_lens_lib import write_to_device, read_words_from_device, run_elf
 from pack import *
 from unpack import *
 from dictionaries import *
-
-def generate_stimuli(stimuli_format):
-
-    if(stimuli_format == "Float16" or stimuli_format == "Float16_b"): 
-        srcA = torch.rand(1024, dtype = format_dict[stimuli_format]) + 0.5
-        srcB = torch.rand(1024, dtype = format_dict[stimuli_format]) + 0.5
-    elif(stimuli_format == "Bfp8_b"):
-        size = 1024
-        integer_part = torch.randint(0, 1, (size,))  
-        fraction = torch.randint(0, 16, (size,)) / 16.0
-        srcA = integer_part.float() + fraction 
-        integer_part = torch.randint(0, 1, (size,))  
-        fraction = torch.randint(0, 16, (size,)) / 16.0
-        srcB = integer_part.float() + fraction  
-
-    return srcA, srcB
+from stimuli_generator import *
 
 def generate_golden(operation, operand1, operand2, data_format):
     if( data_format == "Float16" or data_format == "Float16_b"):

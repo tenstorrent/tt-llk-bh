@@ -7,15 +7,11 @@ from pack import *
 from unpack import *
 import itertools
 from dictionaries import *
+from stimuli_generator import *
 
 def generate_math_kernels(length):
     return list(itertools.product([1, 2, 3], repeat=length))
 
-def generate_stimuli(stimuli_format):
-    srcA = torch.rand(1024, dtype=format_dict[stimuli_format]) + 0.5
-    srcB = torch.rand(1024, dtype=format_dict[stimuli_format]) + 0.5
-    
-    return srcA, srcB
 
 def generate_golden(operations, operand1, operand2, data_format):
     tensor1_float = operand1.clone().detach().to(format_dict[data_format])

@@ -6,15 +6,16 @@ from ttlens.tt_lens_lib import write_to_device, read_words_from_device, run_elf
 from pack import *
 from unpack import *
 from dictionaries import *
+from stimuli_generator import *
 
-def generate_stimuli(stimuli_format):
-    srcA = torch.rand(1024, dtype=format_dict[stimuli_format]) + 2
-    srcB = torch.rand(1024, dtype=format_dict[stimuli_format]) + 2
+# def generate_stimuli(stimuli_format):
+#     srcA = torch.rand(1024, dtype=format_dict[stimuli_format]) + 2
+#     srcB = torch.rand(1024, dtype=format_dict[stimuli_format]) + 2
 
-    #srcA = torch.full((1024,), 2, dtype=format_dict[stimuli_format])
-    #srcB = torch.full((1024,), 2, dtype=format_dict[stimuli_format])
+#     #srcA = torch.full((1024,), 2, dtype=format_dict[stimuli_format])
+#     #srcB = torch.full((1024,), 2, dtype=format_dict[stimuli_format])
 
-    return srcA, srcB
+#     return srcA, srcB
 
 def generate_golden(operand1, operand2, data_format):
     A_float = operand1.clone().detach().to(format_dict[data_format])

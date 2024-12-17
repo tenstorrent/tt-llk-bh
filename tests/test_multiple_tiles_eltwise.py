@@ -6,13 +6,7 @@ from ttlens.tt_lens_lib import write_to_device, read_words_from_device, run_elf
 from pack import *
 from unpack import *
 from dictionaries import *
-
-def generate_stimuli(stimuli_format, tile_cnt):
-    if(stimuli_format == "Float16" or stimuli_format == "Float16_b"):
-        srcA = torch.rand(1024*tile_cnt, dtype=format_dict[stimuli_format]) + 0.5
-        srcB = torch.rand(1024*tile_cnt, dtype=format_dict[stimuli_format]) + 0.5
-    
-    return srcA, srcB
+from stimuli_generator import *
 
 def generate_golden(op, operand1, operand2, data_format):
     tensor1_float = operand1.clone().detach().to(format_dict[data_format])
