@@ -5,22 +5,7 @@ from ttlens.tt_lens_init import init_ttlens
 from ttlens.tt_lens_lib import write_to_device, read_words_from_device, run_elf
 from pack import *
 from unpack import *
-
-format_dict = {
-    "Float32": torch.float32,
-    "Float16": torch.float16,
-    "Float16_b": torch.bfloat16,
-    "Int32": torch.int32
-}
-
-format_args_dict = {
-    "Float32": "FORMAT_FLOAT32",
-    "Float16": "FORMAT_FLOAT16",
-    "Float16_b": "FORMAT_FLOAT16_B",
-    "Bfp8_b" : "FORMAT_BFP8_B",
-    "Int32": "FORMAT_INT32"
-}
-
+from dictionaries import *
 
 def generate_stimuli(stimuli_format):
     if(stimuli_format != "Bfp8_b"):

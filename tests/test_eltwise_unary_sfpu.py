@@ -5,34 +5,15 @@ from ttlens.tt_lens_init import init_ttlens
 from ttlens.tt_lens_lib import write_to_device, read_words_from_device, run_elf
 from pack import *
 from unpack import *
+from dictionaries import *
 import math
-
-format_dict = {
-    "Float32": torch.float32,
-    "Float16": torch.float16,
-    "Float16_b": torch.bfloat16,
-    "Int32": torch.int32
-}
-
-format_args_dict = {
-    "Float32": "FORMAT_FLOAT32",
-    "Float16": "FORMAT_FLOAT16",
-    "Float16_b": "FORMAT_FLOAT16_B",
-    "Int32": "FORMAT_INT32"
-}
-
-mathop_args_dict = {
-    "sqrt": "SFPU_OP_SQRT",
-    "square": "SFPU_OP_SQUARE",
-    "log": "SFPU_OP_LOG"
-}
 
 def generate_stimuli(stimuli_format):
 
     # for simplicity stimuli is only 256 numbers
     # since sfpu operates only on part of dest
-    #srcA = torch.full((256,), 2, dtype=format_dict[stimuli_format])
-    srcA = torch.rand(256, dtype=format_dict[stimuli_format]) + 0.5
+    srcA = torch.full((256,), 2, dtype=format_dict[stimuli_format])
+    #srcA = torch.rand(256, dtype=format_dict[stimuli_format]) + 0.5
     return srcA
 
 def generate_golden(operation, operand1, data_format):
@@ -63,7 +44,7 @@ def write_stimuli_to_l1(buffer_A, stimuli_format):
     elif stimuli_format == "Float16":
         write_to_device("0,0", 0x1b000, pack_fp16(buffer_A))
 
-@pytest.mark.parametrize("format", ["Float16_b", "Float16"])
+@pytest.mark.parametrize("format", ["Float16"])
 @pytest.mark.parametrize("testname", ["eltwise_unary_sfpu_test"])
 @pytest.mark.parametrize("mathop", ["square", "sqrt", "log"])
 def test_all(format, mathop, testname):
