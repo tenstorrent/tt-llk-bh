@@ -50,6 +50,8 @@ def test_all(format, testname):
     make_cmd = f"make format={format_args_dict[format]} testname={testname}"
     os.system(make_cmd)
 
+    run_elf(f"build/elf/brisc.elf", "0,0", risc_id=0)
+
     for i in range(3):
         run_elf(f"build/elf/{testname}_trisc{i}.elf", "0,0", risc_id=i + 1)
 
