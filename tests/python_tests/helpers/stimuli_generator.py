@@ -1,5 +1,5 @@
 import torch
-from dictionaries import *
+from .dictionaries import *
 
 def flatten_list(sublists):
     return [item for sublist in sublists for item in sublist]

@@ -3,10 +3,17 @@ import torch
 import os
 from ttlens.tt_lens_init import init_ttlens
 from ttlens.tt_lens_lib import write_to_device, read_words_from_device, run_elf
-from pack import *
-from unpack import *
-from dictionaries import *
-from stimuli_generator import *
+from helpers import *
+
+ELF_LOCATION = "../build/elf/"
+
+def run_elf_files(testname, run_brisc=True):
+
+    if run_brisc == True:
+        run_elf(f"{ELF_LOCATION}brisc.elf", "0,0", risc_id=0)
+
+    for i in range(3):
+        run_elf(f"{ELF_LOCATION}{testname}_trisc{i}.elf", "0,0", risc_id=i + 1)
 
 def generate_golden(operation, operand1, operand2, data_format):
     if( data_format == "Float16" or data_format == "Float16_b"):
@@ -48,10 +55,9 @@ def test_all(format, mathop, testname):
     write_stimuli_to_l1(src_A, src_B, format)
 
     make_cmd = f"make --silent format={format_args_dict[format]} mathop={mathop_args_dict[mathop]} testname={testname}"
-    os.system(make_cmd)
+    os.system(f"cd .. && {make_cmd}")
 
-    for i in range(3):
-        run_elf(f"build/elf/{testname}_trisc{i}.elf", "0,0", risc_id=i + 1)
+    run_elf_files(testname)
 
     if(format == "Float16" or format == "Float16_b"):
         read_words_cnt = len(src_A)//2
@@ -71,7 +77,7 @@ def test_all(format, mathop, testname):
 
     assert len(res_from_L1) == len(golden)
 
-    os.system("make clean")
+    os.system("cd .. && make clean")
 
     # Mailbox checks
     assert read_words_from_device("0,0", 0x19FF4, word_count=1)[0].to_bytes(4, 'big') == b'\x00\x00\x00\x01'

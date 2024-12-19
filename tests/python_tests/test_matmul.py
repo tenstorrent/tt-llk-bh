@@ -3,19 +3,17 @@ import torch
 import os
 from ttlens.tt_lens_init import init_ttlens
 from ttlens.tt_lens_lib import write_to_device, read_words_from_device, run_elf
-from pack import *
-from unpack import *
-from dictionaries import *
-from stimuli_generator import *
+from helpers import *
 
-# def generate_stimuli(stimuli_format):
-#     srcA = torch.rand(1024, dtype=format_dict[stimuli_format]) + 2
-#     srcB = torch.rand(1024, dtype=format_dict[stimuli_format]) + 2
+ELF_LOCATION = "../build/elf/"
 
-#     #srcA = torch.full((1024,), 2, dtype=format_dict[stimuli_format])
-#     #srcB = torch.full((1024,), 2, dtype=format_dict[stimuli_format])
+def run_elf_files(testname, run_brisc=True):
 
-#     return srcA, srcB
+    if run_brisc == True:
+        run_elf(f"{ELF_LOCATION}brisc.elf", "0,0", risc_id=0)
+
+    for i in range(3):
+        run_elf(f"{ELF_LOCATION}{testname}_trisc{i}.elf", "0,0", risc_id=i + 1)
 
 def generate_golden(operand1, operand2, data_format):
     A_float = operand1.clone().detach().to(format_dict[data_format])
@@ -48,12 +46,9 @@ def test_all(format, testname):
     write_stimuli_to_l1(src_A, src_B, format)
 
     make_cmd = f"make format={format_args_dict[format]} testname={testname}"
-    os.system(make_cmd)
+    os.system(f"cd .. && {make_cmd}")
 
-    run_elf(f"build/elf/brisc.elf", "0,0", risc_id=0)
-
-    for i in range(3):
-        run_elf(f"build/elf/{testname}_trisc{i}.elf", "0,0", risc_id=i + 1)
+    run_elf_files(testname)
 
     read_words_cnt = len(src_A) // (2 if format in ["Float16", "Float16_b"] else 1)
     read_data = read_words_from_device("0,0", 0x1a000, word_count=read_words_cnt)
@@ -64,7 +59,7 @@ def test_all(format, testname):
 
     assert len(res_from_L1) == len(golden)
 
-    os.system("make clean")
+    os.system("cd .. && make clean")
 
     # Mailbox checks
     assert read_words_from_device("0,0", 0x19FF4, word_count=1)[0].to_bytes(4, 'big') == b'\x00\x00\x00\x01'
