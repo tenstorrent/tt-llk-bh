@@ -13,7 +13,7 @@ volatile uint32_t tt_l1_ptr l1_buffer[16] __attribute__ ((section (".text#"))) _
 
 #include "llk_unpack_A.h"
 #include "llk_unpack_common.h"
-#include "../helpers/params.h"
+#include "params.h"
 
 volatile uint32_t* buffer_A = (volatile uint32_t*)0x1b000;
 
@@ -36,7 +36,7 @@ void run_kernel()
 
 #include "llk_math_eltwise_unary_datacopy.h"
 #include "llk_math_common.h"
-#include "../helpers/params.h"
+#include "params.h"
 
 using namespace ckernel;
 using namespace ckernel::sfpu;
@@ -64,7 +64,7 @@ void run_kernel()
 
 #include "llk_pack.h"
 #include "llk_pack_common.h"
-#include "../helpers/params.h"
+#include "params.h"
 
 volatile uint32_t* buffer_Dest = (volatile uint32_t*)0x1a000;
 void run_kernel()

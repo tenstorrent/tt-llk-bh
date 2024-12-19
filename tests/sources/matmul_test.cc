@@ -14,7 +14,7 @@ volatile uint32_t tt_l1_ptr l1_buffer[16] __attribute__ ((section (".text#"))) _
 #ifdef LLK_TRISC_UNPACK
 
 #include "llk_unpack_AB_matmul.h"
-#include "../helpers/params.h"
+#include "params.h"
 
 volatile uint32_t* buffer_A = (volatile uint32_t*)0x1b000;
 volatile uint32_t* buffer_B = (volatile uint32_t*)0x1c000;
@@ -32,7 +32,7 @@ void run_kernel()
 
 #include "llk_math_common.h"
 #include "llk_math_matmul.h"
-#include "../helpers/params.h"
+#include "params.h"
 
 void run_kernel()
 {
@@ -50,7 +50,7 @@ void run_kernel()
 
 #include "llk_pack.h"
 #include "llk_pack_common.h"
-#include "../helpers/params.h"
+#include "params.h"
 
 volatile uint32_t* buffer_Dest = (volatile uint32_t*)0x1a000;
 void run_kernel()

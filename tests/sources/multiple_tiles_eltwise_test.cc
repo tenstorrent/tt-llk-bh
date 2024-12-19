@@ -3,7 +3,7 @@
 
 #include "llk_defs.h"
 #include "ckernel.h"
-#include "../helpers/params.h"
+#include "params.h"
 
 // Globals
 uint32_t unp_cfg_context = 0;
