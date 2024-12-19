@@ -1,6 +1,6 @@
 
 #include "unpack_kernels.h"
-#include "../params.h"
+#include "params.h"
 #include "llk_unpack_A.h"
 #include "llk_unpack_AB.h"
 #include "llk_unpack_AB_matmul.h"

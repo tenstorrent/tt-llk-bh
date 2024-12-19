@@ -1,5 +1,5 @@
 #include "math_kernels.h"
-#include "../params.h"
+#include "params.h"
 #include "llk_math_common.h"
 #include "llk_math_eltwise_binary.h"
 

@@ -1,7 +1,7 @@
 #include "pack_kernels.h"
 #include "llk_pack.h"
 #include "llk_pack_common.h"
-#include "../params.h"
+#include "params.h"
 
     volatile uint32_t* buffer_Dest[PACK_ADDR_CNT] = {(volatile uint32_t*)0x1a000};
 
