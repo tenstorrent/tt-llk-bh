@@ -11,11 +11,11 @@ uint32_t pack_sync_tile_dst_ptr = 0;
 volatile uint32_t tt_l1_ptr l1_buffer[16] __attribute__ ((section (".text#"))) __attribute__ ((aligned (16)));
 
 #ifdef LLK_TRISC_UNPACK
-#include "../helpers/operations/unpack_kernels.h"
+#include "unpack_kernels.h"
 #elif defined(LLK_TRISC_MATH)
-#include "../helpers/operations/math_kernels.h"
+#include "math_kernels.h"
 #elif defined(LLK_TRISC_PACK)
-#include "../helpers/operations/pack_kernels.h"
+#include "pack_kernels.h"
 #endif
 
 void(*kernels[10])(int);

@@ -9,7 +9,7 @@ READELF=$(TOOL_PATH)/riscv32-unknown-elf-readelf
 
 # GCC options
 OPTIONS_ALL=-O3 -mabi=ilp32 -std=c++17 -g -ffast-math -flto
-OPTIONS_COMPILE=-fno-use-cxa-atexit -Wall -fno-exceptions -fno-rtti -Werror -Wno-unknown-pragmas -Wno-error=multistatement-macros -Wno-error=parentheses -Wno-error=unused-but-set-variable -Wno-unused-variable -DTENSIX_FIRMWARE -DDEBUG_PRINT_ENABLED
+OPTIONS_COMPILE=-fno-use-cxa-atexit -Wall -fno-exceptions -fno-rtti -Werror -Wno-unknown-pragmas -Wno-error=multistatement-macros -Wno-error=parentheses -Wno-error=unused-but-set-variable -Wno-unused-variable -DTENSIX_FIRMWARE #-DDEBUG_PRINT_ENABLED
 
 ifeq ($(CHIP_ARCH),wormhole)
 	OPTIONS_ALL+=-mcpu=tt-wh
@@ -23,7 +23,7 @@ endif
 
 OPTIONS_LINK=-fexceptions -Wl,-z,max-page-size=16 -Wl,-z,common-page-size=16 -nostartfiles -Wl,--trace
 INCLUDES = -I../llk_lib -I../common/inc -I../common/inc/sfpu
-INCLUDES += -I../firmware/riscv/common -I../firmware/riscv/$(CHIP_ARCH) -Isfpi/include -Ihelpers/include
+INCLUDES += -I../firmware/riscv/common -I../firmware/riscv/$(CHIP_ARCH) -Isfpi/include -Ihelpers/include -Ihelpers/operations
 
 FORMAT_ARG:=-D$(format) 
 
@@ -74,8 +74,9 @@ OPTIONS_COMPILE+=$(FORMAT_ARG) $(MATHOP_ARG)
 OPTIONS_COMPILE+=$(INCLUDES)
 
 # Define project paths
-RISCV_SOURCE=helpers
-LINKER_SCRIPTS=helpers/ld
+HELPERS=helpers
+RISCV_SOURCES=$(HELPERS)/src
+LINKER_SCRIPTS=$(HELPERS)/ld
 OUTPUT_ELFS = $(BUILD_DIR)/elf
 
 # Define targets
@@ -115,11 +116,11 @@ $(BUILD_DIR)/$(testname)_pack.o: sources/$(testname).cc
 	$(GXX) $(OPTIONS_ALL) $(OPTIONS_COMPILE) $(OPTIONS_PACK) -DLLK_TRISC_PACK -c -o $@ $<
 
 #compiling main for every TRISC core
-$(BUILD_DIR)/main_unpack.o : helpers/trisc.cc
+$(BUILD_DIR)/main_unpack.o : $(RISCV_SOURCES)/trisc.cc
 	$(GXX) $(OPTIONS_ALL) $(OPTIONS_COMPILE) $(OPTIONS_UNPACK) $(MULTIPLE_OPS) -DLLK_TRISC_UNPACK -c -o $@ $<
-$(BUILD_DIR)/main_math.o : helpers/trisc.cc
+$(BUILD_DIR)/main_math.o : $(RISCV_SOURCES)/trisc.cc
 	$(GXX) $(OPTIONS_ALL) $(OPTIONS_COMPILE) $(OPTIONS_MATH) $(MULTIPLE_OPS) -DLLK_TRISC_MATH -c -o $@ $<
-$(BUILD_DIR)/main_pack.o : helpers/trisc.cc
+$(BUILD_DIR)/main_pack.o : $(RISCV_SOURCES)/trisc.cc
 	$(GXX) $(OPTIONS_ALL) $(OPTIONS_COMPILE) $(OPTIONS_PACK) $(MULTIPLE_OPS) -DLLK_TRISC_PACK -c -o $@ $<	
 
 #compiling .cc for all operation libraries
@@ -130,10 +131,10 @@ $(BUILD_DIR)/math.o: helpers/operations/math_kernels.cc
 $(BUILD_DIR)/pack.o: helpers/operations/pack_kernels.cc
 	$(GXX) $(OPTIONS_ALL) $(OPTIONS_COMPILE) $(OPTIONS_PACK) -DLLK_TRISC_PACK -c -o $@ $<
 
-$(BUILD_DIR)/tmu-crt0.o: $(RISCV_SOURCE)/tmu-crt0.S | $(BUILD_DIR)
+$(BUILD_DIR)/tmu-crt0.o: $(HELPERS)/tmu-crt0.S | $(BUILD_DIR)
 	$(GXX) $(OPTIONS_ALL) $(OPTIONS_COMPILE) -c -o $@ $<
 
-$(BUILD_DIR)/brisc.o: $(RISCV_SOURCE)/brisc.cc | $(BUILD_DIR)
+$(BUILD_DIR)/brisc.o: $(RISCV_SOURCES)/brisc.cc | $(BUILD_DIR)
 	$(GXX) $(OPTIONS_ALL) $(OPTIONS_COMPILE) -c -o $@ $<
 clean:
 	rm -rf $(BUILD_DIR)

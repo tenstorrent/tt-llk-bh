@@ -17,17 +17,17 @@ using vptr_uint = volatile uint32_t*;
 #ifdef LLK_TRISC_UNPACK
 	volatile uint32_t* mailbox = (volatile uint32_t*)(0x19FFC);
 	#ifdef MULTIPLE_OPS
-		#include "operations/unpack_kernels.h"
+		#include "unpack_kernels.h"
 	#endif
 #elif defined(LLK_TRISC_MATH)
 	volatile uint32_t* mailbox = (volatile uint32_t*)(0x19FF8);
 	#ifdef MULTIPLE_OPS
-		#include "operations/math_kernels.h"
+		#include "math_kernels.h"
 	#endif
 #elif defined(LLK_TRISC_PACK)
 	volatile uint32_t* mailbox = (volatile uint32_t*)(0x19FF4);
 	#ifdef MULTIPLE_OPS
-		#include "operations/pack_kernels.h"
+		#include "pack_kernels.h"
 	#endif
 #endif
 
