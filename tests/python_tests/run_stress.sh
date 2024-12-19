@@ -42,7 +42,7 @@ fail_count=0
 
 # Run the test for the specified number of iterations
 for i in $(seq 1 "$repeat_count"); do
-    pytest "$test_name" > /dev/null 2>&1
+    pytest "$test_name"".py" #> /dev/null 2>&1
     result=$?
     
     if [ $result -eq 0 ]; then

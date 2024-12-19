@@ -136,6 +136,9 @@ $(BUILD_DIR)/tmu-crt0.o: $(HELPERS)/tmu-crt0.S | $(BUILD_DIR)
 
 $(BUILD_DIR)/brisc.o: $(RISCV_SOURCES)/brisc.cc | $(BUILD_DIR)
 	$(GXX) $(OPTIONS_ALL) $(OPTIONS_COMPILE) -c -o $@ $<
-	
+
 clean:
 	rm -rf $(BUILD_DIR)
+	rm -rf __pycache__
+	rm -rf .pytest_cache
+	$(MAKE) -C python_tests clean
