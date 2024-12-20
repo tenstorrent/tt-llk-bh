@@ -8,7 +8,7 @@
 uint32_t unp_cfg_context = 0;
 uint32_t pack_sync_tile_dst_ptr = 0;
 uint32_t math_sync_tile_dst_index = 0;
-const bool is_fp32_dest_acc_en = false;
+const bool is_fp32_dest_acc_en = true;
 
 volatile uint32_t tt_l1_ptr l1_buffer[16] __attribute__ ((section (".text#"))) __attribute__ ((aligned (16)));
 
@@ -37,11 +37,11 @@ void run_kernel()
 
 void run_kernel()
 {
-    _llk_math_matmul_init_<0,DstTileFaceLayout::RowMajor>();
+    _llk_math_matmul_init_<4,DstTileFaceLayout::RowMajor>();
     _llk_math_pack_sync_init_<DstSync::SyncFull,is_fp32_dest_acc_en>();
     _llk_math_hw_configure_<false,false>(DATA_FORMAT,DATA_FORMAT);
     _llk_math_wait_for_dest_available_<DstSync::SyncFull>();
-    _llk_math_matmul_<0,DstTileFaceLayout::RowMajor>(0);
+    _llk_math_matmul_<4,DstTileFaceLayout::RowMajor>(0);
     _llk_math_dest_section_done_<DstSync::SyncFull,is_fp32_dest_acc_en>();
 }
 
@@ -60,7 +60,7 @@ void run_kernel()
     {
         buffer_Dest[i] = 0xdeadbeef;
     }
-    _llk_pack_hw_configure_<false, is_fp32_dest_acc_en, false >(DATA_FORMAT, DATA_FORMAT, 128); // 128 is for bfloat16
+    _llk_pack_hw_configure_<false, is_fp32_dest_acc_en, false >(DATA_FORMAT, DATA_FORMAT, 128); 
     _llk_pack_init_<false, false, DstTileFaceLayout::RowMajor, false>(DATA_FORMAT);
     #ifdef ARCH_BLACKHOLE
     _llk_pack_dest_init_<DstSync::SyncFull,DstTileFaceLayout::RowMajor,is_fp32_dest_acc_en>();

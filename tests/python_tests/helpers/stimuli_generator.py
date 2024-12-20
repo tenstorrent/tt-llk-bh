@@ -4,14 +4,20 @@ from .dictionaries import *
 def flatten_list(sublists):
     return [item for sublist in sublists for item in sublist]
 
-def generate_one_random_face(stimuli_format):
+#torch.rand(1)[0].item()
+
+def generate_one_random_face(stimuli_format = "Float16_b"):
 
     if(stimuli_format == "Float16" or stimuli_format == "Float16_b"): 
-        # srcA_face = torch.rand(256, dtype = format_dict[stimuli_format]) + 2
-        # srcB_face = torch.rand(256, dtype = format_dict[stimuli_format]) + 2
+        srcA_face = torch.ones(256, dtype = format_dict[stimuli_format]) + 2
+        srcB_face = torch.ones(256, dtype = format_dict[stimuli_format]) + 2
 
-        srcA_face = torch.full((256,), torch.rand(1)[0].item(),dtype = format_dict[stimuli_format])
-        srcB_face = torch.full((256,), torch.rand(1)[0].item(),dtype = format_dict[stimuli_format])
+        # srcA_face = torch.full((256,), torch.rand(1)[0].item(),dtype = format_dict[stimuli_format])
+        # srcB_face = torch.full((256,), torch.rand(1)[0].item(),dtype = format_dict[stimuli_format])
+
+        # srcA_face = torch.arange(256) % 32
+        # srcB_face = torch.arange(256) % 16
+        
 
     elif(stimuli_format == "Bfp8_b"):
         size = 256
@@ -24,7 +30,7 @@ def generate_one_random_face(stimuli_format):
 
     return srcA_face, srcB_face
 
-def generate_stimuli(stimuli_format, tile_cnt = 1):
+def generate_stimuli(stimuli_format = "Float16_b", tile_cnt = 1):
 
     srcA = []
     srcB = []
@@ -34,7 +40,10 @@ def generate_stimuli(stimuli_format, tile_cnt = 1):
         srcA.append(face_a.tolist())
         srcB.append(face_b.tolist())
 
+    srcA = flatten_list(srcA)
+    srcB = flatten_list(srcB)
+
     if stimuli_format != "Bfp8_b":
-        return torch.tensor([item for sublist in srcA for item in sublist], dtype = format_dict[stimuli_format]), torch.tensor([item for sublist in srcB for item in sublist], dtype = format_dict[stimuli_format])
+        return torch.tensor(srcA, dtype = format_dict[stimuli_format]), torch.tensor(srcB, dtype = format_dict[stimuli_format])
     else:
-        return torch.tensor([item for sublist in srcA for item in sublist], dtype = torch.bfloat16), torch.tensor([item for sublist in srcB for item in sublist], dtype = torch.bfloat16)
+        return torch.tensor(srcA, dtype = torch.bfloat16), torch.tensor(srcB, dtype = torch.bfloat16)
