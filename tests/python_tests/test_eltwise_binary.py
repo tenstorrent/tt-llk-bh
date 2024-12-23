@@ -3,8 +3,6 @@ import torch
 import os
 from helpers import *
 
-ELF_LOCATION = "../build/elf/"
-
 def generate_golden(operation, operand1, operand2, data_format):
     if( data_format == "Float16" or data_format == "Float16_b"):
         tensor1_float = operand1.clone().detach().to(format_dict[data_format])

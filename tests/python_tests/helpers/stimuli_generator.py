@@ -30,7 +30,7 @@ def generate_one_random_face(stimuli_format = "Float16_b"):
 
     return srcA_face, srcB_face
 
-def generate_stimuli(stimuli_format = "Float16_b", tile_cnt = 1):
+def generate_stimuli(stimuli_format = "Float16_b", tile_cnt = 1, sfpu = False):
 
     srcA = []
     srcB = []
@@ -43,7 +43,13 @@ def generate_stimuli(stimuli_format = "Float16_b", tile_cnt = 1):
     srcA = flatten_list(srcA)
     srcB = flatten_list(srcB)
 
-    if stimuli_format != "Bfp8_b":
-        return torch.tensor(srcA, dtype = format_dict[stimuli_format]), torch.tensor(srcB, dtype = format_dict[stimuli_format])
+    if sfpu == False:
+
+        if stimuli_format != "Bfp8_b":
+            return torch.tensor(srcA, dtype = format_dict[stimuli_format]), torch.tensor(srcB, dtype = format_dict[stimuli_format])
+        else:
+            return torch.tensor(srcA, dtype = torch.bfloat16), torch.tensor(srcB, dtype = torch.bfloat16)
     else:
-        return torch.tensor(srcA, dtype = torch.bfloat16), torch.tensor(srcB, dtype = torch.bfloat16)
+        srcA = torch.rand(256, dtype=format_dict[stimuli_format]) + 0.5
+        srcB = torch.full((256,), 0, dtype = format_dict[stimuli_format])
+        return srcA,srcB
