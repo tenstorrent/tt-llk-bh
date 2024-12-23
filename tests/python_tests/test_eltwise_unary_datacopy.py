@@ -8,14 +8,15 @@ def generate_golden(operand1,format):
 
 @pytest.mark.parametrize("format", ["Float16_b", "Float16"]) #,"Float32", "Int32"])
 @pytest.mark.parametrize("testname", ["eltwise_unary_datacopy_test"])
-def test_all(format, testname):
+@pytest.mark.parametrize("dest_acc", ["DEST_ACC", ""])
+def test_all(format, testname, dest_acc):
     #context = init_debuda()
     src_A,src_B = generate_stimuli(format)
     srcB = torch.full((1024,), 0, dtype = format_dict[format])
     golden = generate_golden(src_A,format)
     write_stimuli_to_l1(src_A, src_B, format)
 
-    make_cmd = f"make --silent format={format_args_dict[format]} testname={testname}"
+    make_cmd = f"make --silent format={format_args_dict[format]} testname={testname} dest_acc={dest_acc}"
     os.system(f"cd .. && {make_cmd}")
 
     run_elf_files(testname)

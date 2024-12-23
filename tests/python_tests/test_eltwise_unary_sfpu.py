@@ -28,14 +28,15 @@ def generate_golden(operation, operand1, data_format):
 
 @pytest.mark.parametrize("format", ["Float16_b","Float16"])
 @pytest.mark.parametrize("testname", ["eltwise_unary_sfpu_test"])
-@pytest.mark.parametrize("mathop", ["square", "sqrt", "log"])
-def test_all(format, mathop, testname):
+@pytest.mark.parametrize("mathop", ["sqrt", "log","square"])
+@pytest.mark.parametrize("dest_acc", ["DEST_ACC", ""])
+def test_all(format, mathop, testname, dest_acc):
     #context = init_debuda()
     src_A,src_B = generate_stimuli(format,sfpu = True)
     golden = generate_golden(mathop, src_A, format)
     write_stimuli_to_l1(src_A, src_B, format)
 
-    make_cmd = f"make --silent format={format_args_dict[format]} mathop={mathop_args_dict[mathop]} testname={testname}"
+    make_cmd = f"make --silent format={format_args_dict[format]} mathop={mathop_args_dict[mathop]} testname={testname} dest_acc={dest_acc}"
     os.system(f"cd .. && {make_cmd}")
 
     run_elf_files(testname)
