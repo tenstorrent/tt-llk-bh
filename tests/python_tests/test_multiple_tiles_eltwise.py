@@ -1,19 +1,7 @@
 import pytest
 import torch
 import os
-from ttlens.tt_lens_init import init_ttlens
-from ttlens.tt_lens_lib import write_to_device, read_words_from_device, run_elf
 from helpers import *
-
-ELF_LOCATION = "../build/elf/"
-
-def run_elf_files(testname, run_brisc=True):
-
-    if run_brisc == True:
-        run_elf(f"{ELF_LOCATION}brisc.elf", "0,0", risc_id=0)
-
-    for i in range(3):
-        run_elf(f"{ELF_LOCATION}{testname}_trisc{i}.elf", "0,0", risc_id=i + 1)
 
 def generate_golden(op, operand1, operand2, data_format):
     tensor1_float = operand1.clone().detach().to(format_dict[data_format])
@@ -56,32 +44,13 @@ def test_multiple_kernels(format, testname,tile_cnt,mathop):
     pack_kernels = [1] * tile_cnt
     math_kernels = [mathop] * tile_cnt
 
-    # *********** formatting kernels
-
-    unpack_kerns_formatted = ""
-    for i in unpack_kernels:
-        unpack_kerns_formatted+=str(i)+","
-    unpack_kerns_formatted = unpack_kerns_formatted[:-1]
-
-    math_kerns_formatted = ""
-    for i in math_kernels:
-        math_kerns_formatted+=str(i)+","
-    math_kerns_formatted = math_kerns_formatted[:-1]
-
-    pack_kerns_formatted = ""
-    for i in pack_kernels:
-        pack_kerns_formatted+=str(i)+","
-    pack_kerns_formatted = pack_kerns_formatted[:-1]
-
-    pack_addresses_formatted = ""
-    for i in pack_addresses:
-        pack_addresses_formatted+=str(hex(i)+",")
-    pack_addresses_formatted = pack_addresses_formatted[:-1]
-
-    # ******************************** 
+    unpack_kerns_formatted = format_kernel_list(unpack_kernels)
+    math_kerns_formatted = format_kernel_list(math_kernels)
+    pack_kerns_formatted = format_kernel_list(pack_kernels)
+    pack_addresses_formatted = format_kernel_list(pack_addresses, as_hex=True)
 
     #context = init_debuda()
-    src_A, src_B = generate_stimuli(format,tile_cnt)
+    src_A, src_B = generate_stimuli(format,tile_cnt = tile_cnt)
     golden = generate_golden(mathop,src_A,src_B,format)
     write_stimuli_to_l1(src_A,src_B,format,tile_cnt)
 
