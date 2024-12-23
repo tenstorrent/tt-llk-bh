@@ -22,3 +22,9 @@ def write_stimuli_to_l1(buffer_A, buffer_B, stimuli_format):
     elif stimuli_format == "Bfp8_b":
         write_to_device("0,0", 0x1b000, pack_bfp8_b(buffer_A))
         write_to_device("0,0", 0x1c000, pack_bfp8_b(buffer_B))
+    elif stimuli_format == "Int32":
+        write_to_device("0,0", 0x1b000, pack_int32(buffer_A))
+        write_to_device("0,0", 0x1c000, pack_int32(buffer_B))
+    elif stimuli_format == "Float32":
+        write_to_device("0,0", 0x1b000, pack_fp32(buffer_A))
+        write_to_device("0,0", 0x1c000, pack_fp32(buffer_B))
