@@ -3,19 +3,14 @@
 
     #include <cstdint>
     #include <cstdarg>
-    #include <cstdint>
-    #include <cstdlib>
-    #include <cstring>
-    #include <string>
-    #include <array>
-    #include <sstream>
-    #include <vector>
+    #include "params.h"
+
     #define PROCESS_NUMBERS(n, ...) processNumbers(n, __VA_ARGS__)
     #define PROCESS_ADDRESSES(n, ...) process_addresses(n, __VA_ARGS__)
 
     void pack_Dest_kernel(int);
     inline void nop(int){};
-    extern void(*kernels[10])(int);
+    extern kernel_func kernels[10];
     extern volatile uint32_t* buffer_Dest[PACK_ADDR_CNT];
 
     inline void process_addresses(int n, int first, ...) {

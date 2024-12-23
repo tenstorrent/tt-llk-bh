@@ -3,12 +3,13 @@
 
     #include <cstdint>
     #include <cstdarg>
+    #include "params.h"
     #define PROCESS_NUMBERS(n, ...) processNumbers(n, __VA_ARGS__)
 
     void unpack_A_kernel(int);
     void unpack_AB_kernel(int);
     inline void  nop(int){};
-    extern void(*kernels[10])(int);
+    extern kernel_func kernels[10];
 
     /* Function for assigning elemtens of kernerls array to some of kernels */
     inline void processNumbers(int n, int first, ...) {

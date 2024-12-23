@@ -1,7 +1,11 @@
 #ifndef PARAMS_H
 #define PARAMS_H
 
+typedef void (*kernel_func)(int);
+
 #ifdef LLK_TRISC_UNPACK
+
+    #include "unpack_kernels.h"
 
     #ifdef FORMAT_FLOAT16_B
         #define DATA_FORMAT (uint32_t)DataFormat::Float16_b
@@ -22,6 +26,8 @@
 #endif
 
 #ifdef LLK_TRISC_MATH
+
+    #include "math_kernels.h"
 
     #ifdef FORMAT_FLOAT16_B
         #define DATA_FORMAT (uint32_t)DataFormat::Float16_b
@@ -65,6 +71,8 @@
 #endif
 
 #ifdef LLK_TRISC_PACK
+
+    #include "pack_kernels.h"
 
     #ifdef FORMAT_FLOAT16_B
         #define DATA_FORMAT (uint32_t)DataFormat::Float16_b
