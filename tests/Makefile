@@ -73,6 +73,10 @@ endif
 OPTIONS_COMPILE+=$(FORMAT_ARG) $(MATHOP_ARG)
 OPTIONS_COMPILE+=$(INCLUDES)
 
+ifeq ($(dest_acc), DEST_ACC) 
+	OPTIONS_COMPILE+=-DDEST_ACC
+endif
+
 # Define project paths
 HELPERS=helpers
 RISCV_SOURCES=$(HELPERS)/src
