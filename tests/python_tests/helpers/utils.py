@@ -38,6 +38,15 @@ def tilize(original_tensor, stimuli_format="Float16_b"):
     return result.to(dtype=torch.float16 if stimuli_format == "Float16_b" else torch.float32)
 
 
+def format_kernel_list(kernels, as_hex=False):
+    formatted_str = ""
+    for i in kernels:
+        # Use hex formatting if the flag is set, otherwise use decimal
+        if as_hex:
+            formatted_str += str(hex(i)) + ","
+        else:
+            formatted_str += str(i) + ","
+    return formatted_str[:-1]  # Remove the trailing comma
 
 def comp_pcc(golden, calculated, pcc=0.99):
     golden = torch.Tensor(golden)

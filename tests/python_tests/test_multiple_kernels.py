@@ -1,20 +1,8 @@
 import pytest
 import torch
 import os
-from ttlens.tt_lens_init import init_ttlens
-from ttlens.tt_lens_lib import write_to_device, read_words_from_device, run_elf
 import itertools
 from helpers import *
-
-ELF_LOCATION = "../build/elf/"
-
-def run_elf_files(testname, run_brisc=True):
-
-    if run_brisc == True:
-        run_elf(f"{ELF_LOCATION}brisc.elf", "0,0", risc_id=0)
-
-    for i in range(3):
-        run_elf(f"{ELF_LOCATION}{testname}_trisc{i}.elf", "0,0", risc_id=i + 1)
 
 def generate_math_kernels(length):
     return list(itertools.product([1, 2, 3], repeat=length))
@@ -39,14 +27,6 @@ def generate_golden(operations, operand1, operand2, data_format):
     
     return res
 
-def write_stimuli_to_l1(buffer_A, buffer_B, stimuli_format):
-    if stimuli_format == "Float16_b":
-        write_to_device("0,0", 0x1b000, pack_bfp16(buffer_A))
-        write_to_device("0,0", 0x1c000, pack_bfp16(buffer_B))    
-    elif stimuli_format == "Float16":
-        write_to_device("0,0", 0x1b000, pack_fp16(buffer_A))
-        write_to_device("0,0", 0x1c000, pack_fp16(buffer_B))
-
 pack_addresses = [0x1a000,0x1d000, 0x1e000] #, 0x1f000, 0x20000, 0x21000, 0x22000, 0x23000, 0x24000, 0x25000]
 
 
@@ -63,29 +43,10 @@ def test_multiple_kernels(format, testname,length):
 
     for math_kernels in math_kernels_list:
 
-        # *********** formatting kernels
-
-        unpack_kerns_formatted = ""
-        for i in unpack_kernels:
-            unpack_kerns_formatted+=str(i)+","
-        unpack_kerns_formatted = unpack_kerns_formatted[:-1]
-
-        math_kerns_formatted = ""
-        for i in math_kernels:
-            math_kerns_formatted+=str(i)+","
-        math_kerns_formatted = math_kerns_formatted[:-1]
-
-        pack_kerns_formatted = ""
-        for i in pack_kernels:
-            pack_kerns_formatted+=str(i)+","
-        pack_kerns_formatted = pack_kerns_formatted[:-1]
-
-        pack_addresses_formatted = ""
-        for i in pack_addresses:
-            pack_addresses_formatted+=str(hex(i)+",")
-        pack_addresses_formatted = pack_addresses_formatted[:-1]
-
-        # ******************************** 
+        unpack_kerns_formatted = format_kernel_list(unpack_kernels)
+        math_kerns_formatted = format_kernel_list(math_kernels)
+        pack_kerns_formatted = format_kernel_list(pack_kernels)
+        pack_addresses_formatted = format_kernel_list(pack_addresses, as_hex=True)
 
         #context = init_debuda()
         src_A, src_B = generate_stimuli(format)
@@ -127,3 +88,6 @@ def test_multiple_kernels(format, testname,length):
 
         for i in range(len(curr_golden)):
             assert torch.isclose(golden_tensor[i],res_tensor[i], rtol = rtol, atol = atol), f"Failed at index {i} with values {curr_golden[i]} and {res_from_L1[i]}"
+        
+        _ , pcc = comp_pcc(golden_tensor, res_tensor, pcc=0.99) 
+        assert pcc > 0.99
