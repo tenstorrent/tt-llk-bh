@@ -7,7 +7,7 @@ def flatten_list(sublists):
 def generate_random_face(stimuli_format = "Float16_b"):
 
     if(stimuli_format == "Float16" or stimuli_format == "Float16_b"): 
-        srcA_face = torch.rand(256, dtype = format_dict[stimuli_format]) + 0.01 # because of log
+        srcA_face = torch.rand(256, dtype = format_dict[stimuli_format]) + 2 # because of log
        #srcA_face = torch.ones(256, dtype = format_dict[stimuli_format]) *50
     elif(stimuli_format == "Bfp8_b"):
         size = 256

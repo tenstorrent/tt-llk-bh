@@ -17,16 +17,13 @@ def generate_golden(operand1, operand2, data_format):
     result = tilize(result)
     return result
 
-@pytest.mark.parametrize("format", ["Float16_b"])#, "Float16"])
+@pytest.mark.parametrize("format", ["Float16_b", "Float16"])
 @pytest.mark.parametrize("testname", ["matmul_test"])
 def test_all(format, testname):
 
     #context = init_debuda()
     src_A, src_B = generate_stimuli(format)
     golden_tensor = generate_golden(src_A, src_B, format)
-
-    print(src_A.view(32,32))
-    print(src_B.view(32,32))
 
     write_stimuli_to_l1(src_A, src_B, format)
 
@@ -51,23 +48,18 @@ def test_all(format, testname):
     assert read_words_from_device("0,0", 0x19FFC, word_count=1)[0].to_bytes(4, 'big') == b'\x00\x00\x00\x01'
 
     res_tensor = torch.tensor(res_from_L1, dtype=format_dict[format] if format in ["Float16", "Float16_b"] else torch.bfloat16)
-    print(untilize(res_tensor,format).view(32,32))
-    print("\n" *10 )
-    print(untilize(golden_tensor,format).view(32,32))
 
     if(format == "Float16_b" or format == "Float16"):
-        atol = 0.2
-        rtol = 0.1
+        atol = 0.1
+        rtol = 0.05
     elif(format == "Bfp8_b"):
         atol = 0.4
         rtol = 0.3
 
     rel_errs = []
 
-    #for i in range(len(golden)):
-        #rel_errs.append(relative_error(golden_tensor[i], res_tensor[i]))
-        #assert torch.isclose(golden_tensor[i],res_tensor[i], rtol = rtol, atol = atol), f"Failed at index {i} with values {golden[i]} and {res_from_L1[i]}"
+    # for i in range(len(golden_tensor)):
+    #     assert torch.isclose(golden_tensor[i],res_tensor[i], rtol = rtol, atol = atol), f"Failed at index {i} with values {golden_tensor[i]} and {res_from_L1[i]}"
 
-    print(comp_pcc(golden_tensor, res_tensor, pcc=0.99))
-
-    assert 1==0
+    _ , pcc = comp_pcc(golden_tensor, res_tensor, pcc=0.99) 
+    assert pcc > 0.99
