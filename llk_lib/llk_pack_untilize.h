@@ -46,9 +46,11 @@ inline void _llk_pack_untilize_mop_config_(const std::uint32_t face_r_dim = FACE
 
     const uint PACK_INTF_SEL = (num_faces>1) ? p_pacr::TWO_INTFS_ACTIVE: p_pacr::SINGLE_INTF_ACTIVE;
 
+    bool outer_loop_valid = (MOP_OUTER_LOOP > 0) && (MOP_OUTER_LOOP < 128);
+    bool inner_loop_valid = (MOP_INNER_LOOP > 0) && (MOP_INNER_LOOP < 128);
     // Currently no way to check if MOP properly configured when issuing MOP instruction
     // so we check here and guard with a default configuration that only has NOPs
-    if (MOP_OUTER_LOOP > 0 && MOP_INNER_LOOP > 0)
+    if (outer_loop_valid && inner_loop_valid)
     {
         /*
         Each pack instruction does 2x16 datums if (num_faces>1)
