@@ -90,12 +90,6 @@ def float_to_bfp8_block(block):
         mantissa = (signs[i] << 7) | mantissa
         bfp8_mantissas.append(mantissa)
 
-    print("\n\n")
-    print(shared_exponent)
-    print("\n\n")
-    print(bfp8_mantissas)
-    print("\n\n")
-
     return shared_exponent, bfp8_mantissas
 
 def pack_bfp8_b(tensor, block_size=16):
@@ -112,5 +106,13 @@ def pack_bfp8_b(tensor, block_size=16):
         mantissas.extend(bfp8_mantissas)
     
     bfp8_result = exponents + mantissas
+
+    # print("$"*200)
+    # print("EXPONENTS")
+    # print(len(exponents))
+    # print(exponents)
+    # print("MANTISAS")
+    # print(mantissas)
+    # print("\n" * 5)
     
     return bfp8_result
