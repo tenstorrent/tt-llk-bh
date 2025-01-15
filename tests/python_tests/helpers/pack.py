@@ -106,13 +106,5 @@ def pack_bfp8_b(tensor, block_size=16):
         mantissas.extend(bfp8_mantissas)
     
     bfp8_result = exponents + mantissas
-
-    # print("$"*200)
-    # print("EXPONENTS")
-    # print(len(exponents))
-    # print(exponents)
-    # print("MANTISAS")
-    # print(mantissas)
-    # print("\n" * 5)
     
     return bfp8_result

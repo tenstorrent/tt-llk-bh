@@ -11,7 +11,7 @@ def generate_random_face(stimuli_format = "Float16_b"):
        #srcA_face = torch.ones(256, dtype = format_dict[stimuli_format]) *50
     elif(stimuli_format == "Bfp8_b"):
         size = 256
-        integer_part = torch.randint(0, 5, (size,))  
+        integer_part = torch.randint(0, 10, (size,))  
         fraction = torch.randint(0, 16, (size,)).to(dtype = torch.bfloat16) / 16.0
         srcA_face = integer_part.to(dtype = torch.bfloat16) + fraction 
 
