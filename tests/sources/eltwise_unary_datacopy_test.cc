@@ -15,13 +15,7 @@ const bool is_fp32_dest_acc_en = true;
 const bool is_fp32_dest_acc_en = false;
 #endif
 
-#ifdef LLK_TRISC_UNPACK
-
-#include "llk_unpack_A.h"
-#include "llk_unpack_common.h"
-#include "params.h"
-
-volatile uint32_t* buffer_A = (volatile uint32_t*)0x1b000;
+// const bool unpack_to_dest = true;
 
 #if defined(FORMAT_INT32) || defined(FORMAT_FLOAT32)
 const bool unpack_to_dest = true;
@@ -29,6 +23,13 @@ const bool unpack_to_dest = true;
 const bool unpack_to_dest = false;
 #endif
 
+#ifdef LLK_TRISC_UNPACK
+
+#include "llk_unpack_A.h"
+#include "llk_unpack_common.h"
+#include "params.h"
+
+volatile uint32_t* buffer_A = (volatile uint32_t*)0x1b000;
 
 void run_kernel()
 {
@@ -48,16 +49,10 @@ void run_kernel()
 using namespace ckernel;
 using namespace ckernel::sfpu;
 
-#if defined(FORMAT_INT32) || defined(FORMAT_FLOAT32)
-const bool unpack_to_dest = true;
-#else
-const bool unpack_to_dest = false;
-#endif
-
 void run_kernel()
 {
     // copy srca to dest
-    _llk_math_eltwise_unary_datacopy_init_<DataCopyType::A2D, BroadcastType::NONE,false, is_fp32_dest_acc_en, false>(0, 0, 4, DATA_FORMAT);
+    _llk_math_eltwise_unary_datacopy_init_<DataCopyType::A2D, BroadcastType::NONE,false, is_fp32_dest_acc_en, true>(0, 0, 4, DATA_FORMAT);
     _llk_math_pack_sync_init_<DstSync::SyncFull,is_fp32_dest_acc_en>();
     _llk_math_hw_configure_<false,false>(DATA_FORMAT, DATA_FORMAT);
     _llk_math_wait_for_dest_available_<DstSync::SyncFull>();

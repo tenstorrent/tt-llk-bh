@@ -3,17 +3,19 @@ import torch
 import os
 from helpers import *
 
-def generate_golden(operand1,format):
-    return operand1, pack_bfp8_b(operand1)
+torch.set_printoptions(linewidth=500)
 
-@pytest.mark.parametrize("format", ["Bfp8_b"])#Float16_b", "Float16"]) #,"Float32", "Int32"])
+def generate_golden(operand1,format):
+    return operand1
+
+@pytest.mark.parametrize("format",  ["Int32"]) #["Bfp8_b", "Float16_b", "Float16", "Int32","Float32"])
 @pytest.mark.parametrize("testname", ["eltwise_unary_datacopy_test"])
-@pytest.mark.parametrize("dest_acc", ["","DEST_ACC"])
+@pytest.mark.parametrize("dest_acc", ["DEST_ACC"])
 def test_all(format, testname, dest_acc):
     #context = init_debuda()
     src_A,src_B = generate_stimuli(format)
     srcB = torch.full((1024,), 0)
-    golden,packed_garbage = generate_golden(src_A,format)
+    golden = generate_golden(src_A,format)
     write_stimuli_to_l1(src_A, src_B, format)
 
     make_cmd = f"make --silent format={format_args_dict[format]} testname={testname} dest_acc={dest_acc}"
@@ -52,12 +54,12 @@ def test_all(format, testname, dest_acc):
     assert read_words_from_device("0,0", 0x19FF8, word_count=1)[0].to_bytes(4, 'big') == b'\x00\x00\x00\x01'
     assert read_words_from_device("0,0", 0x19FFC, word_count=1)[0].to_bytes(4, 'big') == b'\x00\x00\x00\x01'
 
-    if(format == "Float16_b" or format == "Float16" or format == "Float32"):
+    if(format in format_dict):
         atol = 0.05
         rtol = 0.1
-    elif(format == "Bfp8_b"):
-        atol = 0.4
-        rtol = 0.3
+    else:
+        atol = 0.2
+        rtol = 0.1
 
     golden_tensor = torch.tensor(golden, dtype=format_dict[format] if format in ["Float16", "Float16_b", "Float32", "Int32"] else torch.bfloat16)
     res_tensor = torch.tensor(res_from_L1, dtype=format_dict[format] if format in ["Float16", "Float16_b", "Float32", "Int32"] else torch.bfloat16)

@@ -14,6 +14,10 @@ def generate_random_face(stimuli_format = "Float16_b"):
         integer_part = torch.randint(0, 10, (size,))  
         fraction = torch.randint(0, 16, (size,)).to(dtype = torch.bfloat16) / 16.0
         srcA_face = integer_part.to(dtype = torch.bfloat16) + fraction 
+    elif(stimuli_format == "Float32"):
+        srcA_face = torch.rand(256, dtype = format_dict[stimuli_format]) + 2
+    elif(stimuli_format == "Int32"):
+        srcA_face = torch.arange(256)
 
     return srcA_face
 

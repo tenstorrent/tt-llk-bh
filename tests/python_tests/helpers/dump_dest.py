@@ -1,13 +1,11 @@
 import pytest
 import torch
 import os
-from dbd.tt_debuda_init import init_debuda
-from dbd.tt_debuda_lib import write_to_device, read_words_from_device, run_elf
-from pack import *
-from unpack import *
+from ttlens.tt_lens_init import init_ttlens
+from ttlens.tt_lens_lib import write_to_device, read_words_from_device, run_elf
 
-context = init_debuda()
-read_data = read_words_from_device("18-18", 0x1a000, word_count=512)
+#context = init_debuda()
+read_data = read_words_from_device("0,0", 0x1a000, word_count=512)
 print("read_data[0]", hex(read_data[0]))
 print("read_data[1]", hex(read_data[1]))
 print("read_data[2]", hex(read_data[2]))
@@ -25,8 +23,8 @@ RISCV_DEBUG_REG_DBG_ARRAY_RD_CMD = 0xFFB12064
 RISCV_DEBUG_REG_DBG_ARRAY_RD_DATA = 0xFFB1206C
 
 def read_config_register0(address, mask, shift):
-    write_to_device("18-18", RISCV_DEBUG_REG_CFGREG_RD_CNTL, [address])
-    a = read_words_from_device("18-18", RISCV_DEBUG_REG_CFGREG_RDDATA, word_count=1)
+    write_to_device("0,0", RISCV_DEBUG_REG_CFGREG_RD_CNTL, [address])
+    a = read_words_from_device("0,0", RISCV_DEBUG_REG_CFGREG_RDDATA, word_count=1)
     return (a[0] & mask) >> shift
 
 def flip_bfp16_bits(value):
@@ -52,21 +50,21 @@ print("data format:", data_format)
 force_32bit_format = read_config_register0(ALU_ACC_CTRL_Fp32_enabled_ADDR32, ALU_ACC_CTRL_Fp32_enabled_MASK, ALU_ACC_CTRL_Fp32_enabled_SHAMT)
 print("force 32bit float format:", force_32bit_format)
 
-write_to_device("18-18", RISCV_DEBUG_REG_DBG_ARRAY_RD_EN, [0x1])
+write_to_device("0,0", RISCV_DEBUG_REG_DBG_ARRAY_RD_EN, [0x1])
 #for row in range(64):
 for row in range(64):
     for i in range(8):
         dbg_array_rd_cmd = row + (i << 12) + (2 << 16)
         #print("dbg_array_rd_cmd", hex(dbg_array_rd_cmd), dbg_array_rd_cmd)
-        write_to_device("18-18", RISCV_DEBUG_REG_DBG_ARRAY_RD_CMD, dbg_array_rd_cmd.to_bytes(4, byteorder='little'))
-        rd_data = read_words_from_device("18-18", RISCV_DEBUG_REG_DBG_ARRAY_RD_DATA, word_count=1)
+        write_to_device("0,0", RISCV_DEBUG_REG_DBG_ARRAY_RD_CMD, dbg_array_rd_cmd.to_bytes(4, byteorder='little'))
+        rd_data = read_words_from_device("0,0", RISCV_DEBUG_REG_DBG_ARRAY_RD_DATA, word_count=1)
 
         demangled = flip_dest_bits(rd_data[0])
 
         print("rd_data", hex(demangled), " @ ", row,i)
 
-write_to_device("18-18", RISCV_DEBUG_REG_DBG_ARRAY_RD_EN, [0x0])
-write_to_device("18-18", RISCV_DEBUG_REG_DBG_ARRAY_RD_CMD, [0x0])
+write_to_device("0,0", RISCV_DEBUG_REG_DBG_ARRAY_RD_EN, [0x0])
+write_to_device("0,0", RISCV_DEBUG_REG_DBG_ARRAY_RD_CMD, [0x0])
 
 
 # THREAD_0_CFG = 0 # Thread 0 config
