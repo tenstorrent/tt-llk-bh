@@ -3,6 +3,7 @@
 import struct
 import torch
 import struct
+from .utils import *
 
 def int_to_bytes_list(n):
     binary_str = bin(n)[2:].zfill(32)
@@ -64,17 +65,9 @@ def bfp8_to_float_block(exponent, bfp8_mantissas):
 
     return bfloat16_values
 
-# TODO: make a function to reverse endians in chunks in utils.py and not do it manually here
-
 def unpack_bfp8_b(bfp8_block):
     exponents = bfp8_block[:64]
-    reversed_exponents = []
-    # Because of how reading is done in tt-lens ( little endian )
-    for j in range(0, len(exponents), 4):
-        chunk = exponents[j:j+4]  # Get the next chunk of 4 elements
-        reversed_exponent = chunk[::-1]  # Reverse the chunk
-        reversed_exponents.extend(reversed_exponent)  # Add the reversed chunk to the list
-
+    reversed_exponents = revese_endian_chunk(exponents)
 
     mantissas = bfp8_block[64:]
     
@@ -82,14 +75,9 @@ def unpack_bfp8_b(bfp8_block):
     for i in range(len(reversed_exponents)):
         exponent = reversed_exponents[i]
         bfp8_mantissas = mantissas[i * 16:(i + 1) * 16]        
-        reversed_chunks = []
-        # Because of how reading is done in tt-lens ( little endian )
-        for j in range(0, len(bfp8_mantissas), 4):
-            chunk = bfp8_mantissas[j:j+4]  # Get the next chunk of 4 elements
-            reversed_chunk = chunk[::-1]  # Reverse the chunk
-            reversed_chunks.extend(reversed_chunk)  # Add the reversed chunk to the list
+        reversed_sign_mantissa = revese_endian_chunk(bfp8_mantissas)
 
-        block_bfloat16_values = bfp8_to_float_block(exponent, reversed_chunks)
+        block_bfloat16_values = bfp8_to_float_block(exponent, reversed_sign_mantissa)
         bfloat16_values.extend(block_bfloat16_values)
     
     return torch.tensor(bfloat16_values, dtype=torch.bfloat16)

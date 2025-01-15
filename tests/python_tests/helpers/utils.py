@@ -37,6 +37,18 @@ def tilize(original_tensor, stimuli_format="Float16_b"):
     # Return the tensor in the requested format (if applicable)
     return result.to(dtype=torch.float16 if stimuli_format == "Float16_b" else torch.float32)
 
+def revese_endian_chunk(input_list, chunk_size = 4):
+
+    output_list = []
+    
+    for j in range(0, len(input_list), chunk_size):
+        chunk = input_list[j:j+chunk_size]
+        reversed_chunk = chunk[::-1]
+        output_list.extend(reversed_chunk)
+    
+    return output_list
+
+
 
 def format_kernel_list(kernels, as_hex=False):
     formatted_str = ""
