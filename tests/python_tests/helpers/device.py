@@ -34,3 +34,17 @@ def write_stimuli_to_l1(buffer_A, buffer_B, stimuli_format, tile_cnt = 1):
     elif stimuli_format == "Float32":
         write_to_device("0,0", 0x1b000, pack_fp32(buffer_A))
         write_to_device("0,0", buffer_B_address, pack_fp32(buffer_B))
+
+def get_result_from_device(format,read_data_bytes):
+    if(format == "Float16"):
+        res_from_L1 = unpack_fp16(read_data_bytes)
+    elif(format == "Float16_b"):
+        res_from_L1 = unpack_bfp16(read_data_bytes)
+    elif( format == "Bfp8_b"):
+        res_from_L1 = unpack_bfp8_b(read_data_bytes)
+    elif( format == "Float32"):
+        res_from_L1 = unpack_float32(read_data_bytes)
+    elif( format == "Int32"):
+        res_from_L1 = unpack_int32(read_data_bytes)
+
+    return res_from_L1

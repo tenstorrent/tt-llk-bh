@@ -8,9 +8,9 @@ torch.set_printoptions(linewidth=500)
 def generate_golden(operand1,format):
     return operand1
 
-@pytest.mark.parametrize("format",  ["Int32"]) #["Bfp8_b", "Float16_b", "Float16", "Int32","Float32"])
+@pytest.mark.parametrize("format",  ["Float16"]) #["Bfp8_b", "Float16_b", "Float16", "Int32","Float32"])
 @pytest.mark.parametrize("testname", ["eltwise_unary_datacopy_test"])
-@pytest.mark.parametrize("dest_acc", ["DEST_ACC"])
+@pytest.mark.parametrize("dest_acc", ["","DEST_ACC"])
 def test_all(format, testname, dest_acc):
     #context = init_debuda()
     src_A,src_B = generate_stimuli(format)
@@ -23,27 +23,10 @@ def test_all(format, testname, dest_acc):
 
     run_elf_files(testname)
 
-    if(format == "Float16" or format == "Float16_b"):
-        read_words_cnt = len(src_A)//2
-    elif( format == "Bfp8_b"):
-        read_words_cnt = len(src_A)//4 + 32 # 272 for one tile
-    elif( format == "Float32" or format == "Int32"):
-        read_words_cnt = len(src_A)
-
+    read_words_cnt = calculate_read_words_cnt(format,src_A)
     read_data = read_words_from_device("0,0", 0x1a000, word_count=read_words_cnt)
-    
     read_data_bytes = flatten_list([int_to_bytes_list(data) for data in read_data])
-
-    if(format == "Float16"):
-        res_from_L1 = unpack_fp16(read_data_bytes)
-    elif(format == "Float16_b"):
-        res_from_L1 = unpack_bfp16(read_data_bytes)
-    elif( format == "Bfp8_b"):
-        res_from_L1 = unpack_bfp8_b(read_data_bytes)
-    elif( format == "Float32"):
-        res_from_L1 = unpack_float32(read_data_bytes)
-    elif( format == "Int32"):
-        res_from_L1 = unpack_int32(read_data_bytes)
+    res_from_L1 = get_result_from_device(format,read_data_bytes)
 
     assert len(res_from_L1) == len(golden)
 
