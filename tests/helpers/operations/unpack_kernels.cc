@@ -7,8 +7,8 @@
 #include "llk_unpack_common.h"
 
     #ifndef UNPACK_A_ADDRS
-        volatile uint32_t* buffer_A = (volatile uint32_t*)0x1b000;
-        volatile uint32_t* buffer_B = (volatile uint32_t*)0x1c000;
+        volatile uint32_t* buffer_A = (volatile uint32_t*)0x1a000;
+        volatile uint32_t* buffer_B = (volatile uint32_t*)0x1b000;
     #else
         volatile uint32_t* buffer_A = (volatile uint32_t*)0x1a000;
         volatile uint32_t* buffer_B = (volatile uint32_t*)(0x1a000 + UNPACK_A_ADDR_CNT*TILE_SIZE_ELEMENTS);

@@ -3,7 +3,7 @@
 #include "llk_pack_common.h"
 #include "params.h"
 
-    volatile uint32_t* buffer_Dest[PACK_ADDR_CNT] = {(volatile uint32_t*)0x1a000};
+    volatile uint32_t* buffer_Dest[PACK_ADDR_CNT] = {(volatile uint32_t*)0x1c000};
 
     inline void pack_init(){
         _llk_pack_hw_configure_(DATA_FORMAT, DATA_FORMAT, 16*16*4);
