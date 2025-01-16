@@ -29,7 +29,7 @@ const bool unpack_to_dest = false;
 #include "llk_unpack_common.h"
 #include "params.h"
 
-volatile uint32_t* buffer_A = (volatile uint32_t*)0x1b000;
+volatile uint32_t* buffer_A = (volatile uint32_t*)0x1a000;
 
 void run_kernel()
 {
@@ -68,7 +68,7 @@ void run_kernel()
 #include "llk_pack_common.h"
 #include "params.h"
 
-volatile uint32_t* buffer_Dest = (volatile uint32_t*)0x1a000;
+volatile uint32_t* buffer_Dest = (volatile uint32_t*)0x1c000;
 void run_kernel()
 {
     for(int i = 0; i < 16*16*4; i++)

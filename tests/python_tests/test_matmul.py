@@ -6,11 +6,11 @@ from helpers import *
 torch.set_printoptions(precision=2, linewidth=800, threshold=100000, sci_mode=False)
 
 def generate_golden(operand1, operand2, data_format):
-    A_float = operand1.clone().detach().to(format_dict[data_format])
-    B_float = operand2.clone().detach().to(format_dict[data_format])
+    # A_float = operand1.clone().detach()#.to(format_dict[data_format])
+    # B_float = operand2.clone().detach()#.to(format_dict[data_format])
 
-    A_untilized = untilize(A_float,data_format)
-    B_untilized = untilize(B_float,data_format)
+    A_untilized = untilize(operand1,data_format)
+    B_untilized = untilize(operand2,data_format)
 
     result = torch.matmul(A_untilized, B_untilized )
 
@@ -33,8 +33,8 @@ def test_all(format, testname, dest_acc):
 
     run_elf_files(testname)
 
-    read_words_cnt = len(src_A) // (2 if format in ["Float16", "Float16_b"] else 1)
-    read_data = read_words_from_device("0,0", 0x1a000, word_count=read_words_cnt)    
+    read_words_cnt = calculate_read_words_cnt(format,src_A)
+    read_data = read_words_from_device("0,0", 0x1c000, word_count=read_words_cnt)    
     read_data_bytes = flatten_list([int_to_bytes_list(data) for data in read_data])
     res_from_L1 = unpack_bfp16(read_data_bytes) if format == "Float16_b" else unpack_fp16(read_data_bytes)
 

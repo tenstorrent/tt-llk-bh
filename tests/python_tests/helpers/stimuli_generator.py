@@ -44,5 +44,5 @@ def generate_stimuli(stimuli_format = "Float16_b", tile_cnt = 1, sfpu = False):
             return torch.tensor(srcA, dtype = torch.bfloat16), torch.tensor(srcB, dtype = torch.bfloat16)
     else:
         srcA = generate_random_face(stimuli_format)
-        srcB = torch.full((256,), 0, dtype = format_dict[stimuli_format])
+        srcB = torch.full((256,), 0)
         return srcA,srcB
