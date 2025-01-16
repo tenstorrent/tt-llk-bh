@@ -14,12 +14,15 @@ def run_elf_files(testname, run_brisc=True):
 
 def write_stimuli_to_l1(buffer_A, buffer_B, stimuli_format, tile_cnt = 1):
 
-    if tile_cnt != 1:   
-        buffer_B_address = 0x1a000 + 1024*tile_cnt
-        buffer_A_address = 0x1a000
-    else:
-        buffer_B_address = 0x1b000
-        buffer_A_address = 0x1a000
+    buffer_A_address = 0x1a000
+    buffer_B_address = 0x1a000 + 1024*tile_cnt
+
+    # if tile_cnt != 1:   
+    #     buffer_B_address = 0x1a000 + 1024*tile_cnt
+    #     buffer_A_address = 0x1a000
+    # else:
+    #     buffer_B_address = 0x1b000
+    #     buffer_A_address = 0x1a000
 
     if stimuli_format == "Float16_b":
         write_to_device("0,0", buffer_A_address, pack_bfp16(buffer_A))

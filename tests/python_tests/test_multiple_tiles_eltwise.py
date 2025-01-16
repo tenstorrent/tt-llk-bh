@@ -18,17 +18,6 @@ def generate_golden(op, operand1, operand2, data_format):
     
     return res.tolist()
 
-def write_stimuli_to_l1(buffer_A, buffer_B, stimuli_format, tile_cnt):
-
-    buffer_B_address = 0x1a000 + 1024*tile_cnt
-
-    if stimuli_format == "Float16_b":
-        write_to_device("0,0", 0x1a000, pack_bfp16(buffer_A))
-        write_to_device("0,0", buffer_B_address, pack_bfp16(buffer_B))    
-    elif stimuli_format == "Float16":
-        write_to_device("0,0", 0x1a000, pack_fp16(buffer_A))
-        write_to_device("0,0", buffer_B_address, pack_fp16(buffer_B))
-
 @pytest.mark.parametrize("mathop", range(1,4))
 @pytest.mark.parametrize("tile_cnt", range(1,4))
 @pytest.mark.parametrize("format", ["Float16_b", "Float16"])
@@ -84,6 +73,9 @@ def test_multiple_kernels(format, testname,tile_cnt,mathop):
         chunk_size = 1024
     
     res_sublists = [res_from_L1[i:i + chunk_size] for i in range(0, len(res_from_L1), chunk_size)]
+
+    golden_tensor = torch.tensor(golden, dtype=format_dict[format] if format in ["Float16", "Float16_b"] else torch.bfloat16)
+    res_tensor = torch.tensor(res_from_L1, dtype=format_dict[format] if format in ["Float16", "Float16_b"] else torch.bfloat16)
 
     if(format == "Float16_b" or format == "Float16"):
         atol = 0.05
