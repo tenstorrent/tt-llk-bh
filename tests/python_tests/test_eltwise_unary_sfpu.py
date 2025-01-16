@@ -40,18 +40,10 @@ def test_all(format, mathop, testname, dest_acc):
     os.system(f"cd .. && {make_cmd}")
 
     run_elf_files(testname)
-
-    if(format == "Float16" or format == "Float16_b"):
-        read_words_cnt = len(src_A)//2
-    
+    read_words_cnt = calculate_read_words_cnt(format,src_A)
     read_data = read_words_from_device("0,0", 0x1a000, word_count=read_words_cnt)
-    
     read_data_bytes = flatten_list([int_to_bytes_list(data) for data in read_data])
-    
-    if (format == "Float16_b"):
-        res_from_L1 = unpack_bfp16(read_data_bytes)
-    elif (format == "Float16"):
-        res_from_L1 = unpack_fp16(read_data_bytes)
+    res_from_L1 = get_result_from_device(format,read_data_bytes)
     
     assert len(res_from_L1) == len(golden)
 

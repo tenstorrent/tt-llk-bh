@@ -34,12 +34,9 @@ def test_all(format, testname, dest_acc):
     run_elf_files(testname)
 
     read_words_cnt = len(src_A) // (2 if format in ["Float16", "Float16_b"] else 1)
-    read_data = read_words_from_device("0,0", 0x1a000, word_count=read_words_cnt)
-    
+    read_data = read_words_from_device("0,0", 0x1a000, word_count=read_words_cnt)    
     read_data_bytes = flatten_list([int_to_bytes_list(data) for data in read_data])
-    
     res_from_L1 = unpack_bfp16(read_data_bytes) if format == "Float16_b" else unpack_fp16(read_data_bytes)
-
 
     os.system("cd .. && make clean")
 
