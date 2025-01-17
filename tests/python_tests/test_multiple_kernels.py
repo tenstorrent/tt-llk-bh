@@ -27,13 +27,14 @@ def generate_golden(operations, operand1, operand2, data_format):
     
     return res
 
-pack_addresses = [0x1a000,0x1d000, 0x1e000] #, 0x1f000, 0x20000, 0x21000, 0x22000, 0x23000, 0x24000, 0x25000]
+pack_addresses = [0x1c000,0x1d000, 0x1e000] #, 0x1f000, 0x20000, 0x21000, 0x22000, 0x23000, 0x24000, 0x25000]
 
 
 @pytest.mark.parametrize("length", range(1,len(pack_addresses)+1))
 @pytest.mark.parametrize("format", ["Float16_b"])
+@pytest.mark.parametrize("dest_acc", ["","DEST_ACC"])
 @pytest.mark.parametrize("testname", ["multiple_ops_test"])
-def test_multiple_kernels(format, testname,length):
+def test_multiple_kernels(format, testname,length, dest_acc):
 
     unpack_kernels = [2]*length
     pack_kernels = [1]*length
@@ -53,7 +54,7 @@ def test_multiple_kernels(format, testname,length):
         golden = generate_golden(math_kernels, src_A, src_B, format)
         write_stimuli_to_l1(src_A, src_B, format)
 
-        make_cmd = f"make --silent format={format_args_dict[format]} testname={testname}"
+        make_cmd = f"make --silent format={format_args_dict[format]} testname={testname} dest_acc={dest_acc}"
         make_cmd += " unpack_kern_cnt="+ str(len(unpack_kernels))+ " unpack_kerns="+unpack_kerns_formatted
         make_cmd += " math_kern_cnt="+ str(len(math_kernels))+ " math_kerns="+math_kerns_formatted
         make_cmd += " pack_kern_cnt="+ str(len(pack_kernels))+ " pack_kerns="+pack_kerns_formatted
