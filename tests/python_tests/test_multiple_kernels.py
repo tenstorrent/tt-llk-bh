@@ -8,9 +8,12 @@ def generate_math_kernels(length):
     return list(itertools.product([1, 2, 3], repeat=length))
 
 def generate_golden(operations, operand1, operand2, data_format):
-    tensor1_float = operand1.clone().detach().to(format_dict[data_format])
-    tensor2_float = operand2.clone().detach().to(format_dict[data_format])
-    
+    if( data_format == "Float16" or data_format == "Float16_b"):
+        tensor1_float = operand1.clone().detach().to(format_dict[data_format])
+        tensor2_float = operand2.clone().detach().to(format_dict[data_format])
+    else:
+        tensor1_float = operand1.clone().detach().to(format_dict["Float16_b"])
+        tensor2_float = operand2.clone().detach().to(format_dict["Float16_b"])
     res = []
 
     for op in operations:
@@ -31,7 +34,7 @@ pack_addresses = [0x1c000,0x1d000, 0x1e000] #, 0x1f000, 0x20000, 0x21000, 0x2200
 
 
 @pytest.mark.parametrize("length", range(1,len(pack_addresses)+1))
-@pytest.mark.parametrize("format", ["Float16_b"])
+@pytest.mark.parametrize("format", [ "Bfp8_b"])#,"Float16_b", "Float16"])
 @pytest.mark.parametrize("dest_acc", ["","DEST_ACC"])
 @pytest.mark.parametrize("testname", ["multiple_ops_test"])
 def test_multiple_kernels(format, testname,length, dest_acc):
@@ -71,14 +74,13 @@ def test_multiple_kernels(format, testname,length, dest_acc):
         assert read_words_from_device("0,0", 0x19FFC, word_count=1)[0].to_bytes(4, 'big') == b'\x00\x00\x00\x01'
 
         for index in range(len(golden)):
-            read_words_cnt = len(src_A) // (2 if format in ["Float16", "Float16_b"] else 1)
+            read_words_cnt = calculate_read_words_cnt(format,src_A)
             read_data = read_words_from_device("0,0", pack_addresses[index], word_count=read_words_cnt)
             read_data_bytes = flatten_list([int_to_bytes_list(data) for data in read_data])
-            res_from_L1 = unpack_bfp16(read_data_bytes) if format == "Float16_b" else unpack_fp16(read_data_bytes)
+            res_from_L1 = get_result_from_device(format,read_data_bytes)
             curr_golden = golden[index]
 
             assert len(res_from_L1) == len(curr_golden)
-            print("Checking all elements of golden at index: ", index)
 
             golden_tensor = torch.tensor(curr_golden, dtype=format_dict[format] if format in ["Float16", "Float16_b"] else torch.bfloat16)
             res_tensor = torch.tensor(res_from_L1, dtype=format_dict[format] if format in ["Float16", "Float16_b"] else torch.bfloat16)
@@ -86,6 +88,9 @@ def test_multiple_kernels(format, testname,length, dest_acc):
             if(format == "Float16_b" or format == "Float16"):
                 atol = 0.05
                 rtol = 0.1
+            elif(format == "Bfp8_b"):
+                atol = 0.4
+                rtol = 0.3
 
         for i in range(len(curr_golden)):
             assert torch.isclose(golden_tensor[i],res_tensor[i], rtol = rtol, atol = atol), f"Failed at index {i} with values {curr_golden[i]} and {res_from_L1[i]}"
