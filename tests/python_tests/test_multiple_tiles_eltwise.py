@@ -21,12 +21,13 @@ def generate_golden(op, operand1, operand2, data_format):
 @pytest.mark.parametrize("mathop", range(1,4))
 @pytest.mark.parametrize("tile_cnt", range(1,4))
 @pytest.mark.parametrize("format", ["Float16_b", "Float16"])
+@pytest.mark.parametrize("dest_acc", ["","DEST_ACC"])
 @pytest.mark.parametrize("testname", ["multiple_tiles_eltwise_test"])
-def test_multiple_kernels(format, testname,tile_cnt,mathop):
+def test_multiple_kernels(format, testname, tile_cnt, mathop, dest_acc):
 
     # prepare setup for running kernels
 
-    pack_start_address = 0x1a000 + 2*1024*tile_cnt
+    pack_start_address = 0x1a000 + 2*4096*tile_cnt
     pack_addresses = [pack_start_address + 0x1000 * i for i in range(tile_cnt)]
 
     unpack_kernels = [2] * tile_cnt
@@ -43,7 +44,7 @@ def test_multiple_kernels(format, testname,tile_cnt,mathop):
     golden = generate_golden(mathop,src_A,src_B,format)
     write_stimuli_to_l1(src_A,src_B,format,tile_cnt)
 
-    make_cmd = f"make --silent format={format_args_dict[format]} testname={testname}"
+    make_cmd = f"make --silent format={format_args_dict[format]} testname={testname} dest_acc={dest_acc}"
     make_cmd += " unpack_kern_cnt="+ str(len(unpack_kernels))+ " unpack_kerns="+unpack_kerns_formatted
     make_cmd += " math_kern_cnt="+ str(len(math_kernels))+ " math_kerns="+math_kerns_formatted
     make_cmd += " pack_kern_cnt="+ str(len(pack_kernels))+ " pack_kerns="+pack_kerns_formatted
@@ -86,4 +87,4 @@ def test_multiple_kernels(format, testname,tile_cnt,mathop):
 
     for sublist in res_sublists:
         for i in range(len(sublist)):  
-            assert torch.isclose(torch.tensor(res_from_L1[i]),torch.tensor(golden[i]), rtol = rtol, atol = atol)
+            assert torch.isclose(torch.tensor(res_from_L1[i]),torch.tensor(golden[i]), rtol = rtol, atol = atol), f"Failed at index {i} with values {golden[i]} and {res_from_L1[i]}"
