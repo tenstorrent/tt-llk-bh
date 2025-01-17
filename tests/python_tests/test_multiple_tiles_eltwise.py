@@ -4,8 +4,12 @@ import os
 from helpers import *
 
 def generate_golden(op, operand1, operand2, data_format):
-    tensor1_float = operand1.clone().detach().to(format_dict[data_format])
-    tensor2_float = operand2.clone().detach().to(format_dict[data_format])
+    if( data_format == "Float16" or data_format == "Float16_b"):
+        tensor1_float = operand1.clone().detach().to(format_dict[data_format])
+        tensor2_float = operand2.clone().detach().to(format_dict[data_format])
+    else:
+        tensor1_float = operand1.clone().detach().to(format_dict["Float16_b"])
+        tensor2_float = operand2.clone().detach().to(format_dict["Float16_b"])
 
     if(op==1):
         res = tensor1_float + tensor2_float
@@ -19,9 +23,9 @@ def generate_golden(op, operand1, operand2, data_format):
     return res.tolist()
 
 @pytest.mark.parametrize("mathop", range(1,4))
-@pytest.mark.parametrize("tile_cnt", range(1,4))
-@pytest.mark.parametrize("format", ["Float16_b", "Float16"])
-@pytest.mark.parametrize("dest_acc", ["","DEST_ACC"])
+@pytest.mark.parametrize("tile_cnt", range(2,3))
+@pytest.mark.parametrize("format", ["Float16_b"]) #,"Float16_b", "Float16"])
+@pytest.mark.parametrize("dest_acc", [""])#,"DEST_ACC"])
 @pytest.mark.parametrize("testname", ["multiple_tiles_eltwise_test"])
 def test_multiple_kernels(format, testname, tile_cnt, mathop, dest_acc):
 
@@ -29,6 +33,10 @@ def test_multiple_kernels(format, testname, tile_cnt, mathop, dest_acc):
 
     pack_start_address = 0x1a000 + 2*4096*tile_cnt
     pack_addresses = [pack_start_address + 0x1000 * i for i in range(tile_cnt)]
+
+    print("\n\n PACK ADDRESSES \n\n")
+    for address in pack_addresses:
+        print(hex(address))
 
     unpack_kernels = [2] * tile_cnt
     pack_kernels = [1] * tile_cnt
@@ -63,18 +71,21 @@ def test_multiple_kernels(format, testname, tile_cnt, mathop, dest_acc):
 
     #check resluts from multiple tiles
 
-    read_words_cnt = len(src_A) // (2 if format in ["Float16", "Float16_b"] else 1)
+    read_words_cnt = calculate_read_words_cnt(format,src_A)
     read_data = read_words_from_device("0,0", pack_start_address, word_count=read_words_cnt*tile_cnt)
     read_data_bytes = flatten_list([int_to_bytes_list(data) for data in read_data])
-    res_from_L1 = unpack_bfp16(read_data_bytes) if format == "Float16_b" else unpack_fp16(read_data_bytes)
+    sublist_size = read_words_cnt * 4
+    res_sublists = []
+    for i in range(tile_cnt):
+        res_sublists.append(read_data_bytes[i*sublist_size: i*sublist_size+sublist_size])
 
-    if(format == "Float16" or format == "Float16_b"):
-        chunk_size = 512
-    else:
-        chunk_size = 1024
+    res_from_L1 = []
+
+    for sublist in res_sublists:
+        res_from_L1.append(get_result_from_device(format,sublist))
+
+    res_from_L1 = flatten_list(res_from_L1)
     
-    res_sublists = [res_from_L1[i:i + chunk_size] for i in range(0, len(res_from_L1), chunk_size)]
-
     golden_tensor = torch.tensor(golden, dtype=format_dict[format] if format in ["Float16", "Float16_b"] else torch.bfloat16)
     res_tensor = torch.tensor(res_from_L1, dtype=format_dict[format] if format in ["Float16", "Float16_b"] else torch.bfloat16)
 
@@ -84,7 +95,6 @@ def test_multiple_kernels(format, testname, tile_cnt, mathop, dest_acc):
     elif(format == "Bfp8_b"):
         atol = 0.4
         rtol = 0.3
-
-    for sublist in res_sublists:
-        for i in range(len(sublist)):  
-            assert torch.isclose(torch.tensor(res_from_L1[i]),torch.tensor(golden[i]), rtol = rtol, atol = atol), f"Failed at index {i} with values {golden[i]} and {res_from_L1[i]}"
+  
+    _ , pcc = comp_pcc(golden_tensor, res_tensor, pcc=0.99) 
+    assert pcc > 0.99

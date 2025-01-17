@@ -24,21 +24,36 @@ def write_stimuli_to_l1(buffer_A, buffer_B, stimuli_format, tile_cnt = 1):
     #     buffer_B_address = 0x1b000
     #     buffer_A_address = 0x1a000
 
-    if stimuli_format == "Float16_b":
-        write_to_device("0,0", buffer_A_address, pack_bfp16(buffer_A))
-        write_to_device("0,0", buffer_B_address, pack_bfp16(buffer_B))    
-    elif stimuli_format == "Float16":
-        write_to_device("0,0", buffer_A_address, pack_fp16(buffer_A))
-        write_to_device("0,0", buffer_B_address, pack_fp16(buffer_B))
-    elif stimuli_format == "Bfp8_b":
-        write_to_device("0,0", buffer_A_address, pack_bfp8_b(buffer_A))
-        write_to_device("0,0", buffer_B_address, pack_bfp8_b(buffer_B))
-    elif stimuli_format == "Int32":
-        write_to_device("0,0", buffer_A_address, pack_int32(buffer_A))
-        write_to_device("0,0", buffer_B_address, pack_int32(buffer_B))
-    elif stimuli_format == "Float32":
-        write_to_device("0,0", buffer_A_address, pack_fp32(buffer_A))
-        write_to_device("0,0", buffer_B_address, pack_fp32(buffer_B))
+    for i in range(tile_cnt):
+
+        print("\n\n WRITING TILE TO A :")
+        print(hex(buffer_A_address))
+        print("\n\n WRITING TILE TO B :")
+        print(hex(buffer_B_address))
+
+        buffer_A_tile = buffer_A[1024*i: 1024*i+1024]
+        buffer_B_tile = buffer_B[1024*i: 1024*i+1024]
+
+        if stimuli_format == "Float16_b":
+            write_to_device("0,0", buffer_A_address, pack_bfp16(buffer_A_tile))
+            write_to_device("0,0", buffer_B_address, pack_bfp16(buffer_B_tile))    
+        elif stimuli_format == "Float16":
+            write_to_device("0,0", buffer_A_address, pack_fp16(buffer_A_tile))
+            write_to_device("0,0", buffer_B_address, pack_fp16(buffer_B_tile))
+        elif stimuli_format == "Bfp8_b":
+            write_to_device("0,0", buffer_A_address, pack_bfp8_b(buffer_A_tile))
+            write_to_device("0,0", buffer_B_address, pack_bfp8_b(buffer_B_tile))
+        elif stimuli_format == "Int32":
+            write_to_device("0,0", buffer_A_address, pack_int32(buffer_A_tile))
+            write_to_device("0,0", buffer_B_address, pack_int32(buffer_B_tile))
+        elif stimuli_format == "Float32":
+            write_to_device("0,0", buffer_A_address, pack_fp32(buffer_A_tile))
+            write_to_device("0,0", buffer_B_address, pack_fp32(buffer_B_tile))
+        
+        buffer_A_address += 4096
+        buffer_B_address += 4096
+        
+        
 
 def get_result_from_device(format,read_data_bytes):
     if(format == "Float16"):
