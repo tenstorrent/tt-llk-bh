@@ -15,7 +15,7 @@ def run_elf_files(testname, run_brisc=True):
 def write_stimuli_to_l1(buffer_A, buffer_B, stimuli_format, tile_cnt = 1):
 
     buffer_A_address = 0x1a000
-    buffer_B_address = 0x1a000 + 1024*tile_cnt
+    buffer_B_address = 0x1a000 + 4096*tile_cnt
 
     # if tile_cnt != 1:   
     #     buffer_B_address = 0x1a000 + 1024*tile_cnt

@@ -45,7 +45,9 @@ void run_kernel()
     _llk_math_pack_sync_init_<DstSync::SyncFull,is_fp32_dest_acc_en>();
     _llk_math_hw_configure_<false,false>(DATA_FORMAT,DATA_FORMAT);
     _llk_math_eltwise_binary_init_<ELTWISE_BINARY_OP, BroadcastType::NONE>(4, 0, 0);
-    _llk_math_eltwise_binary_<ELTWISE_BINARY_OP, BroadcastType::NONE,DstSync::SyncFull>(4, 0, true);
+    _llk_math_wait_for_dest_available_<DstSync::SyncFull>();
+    //_llk_math_eltwise_binary_<ELTWISE_BINARY_OP, BroadcastType::NONE,DstSync::SyncFull>(4, 0, true);
+    _llk_math_eltwise_binary_<ELTWISE_BINARY_OP, BroadcastType::NONE,DstSync::SyncFull, 0, EltwiseBinaryReuseDestType::NONE, is_fp32_dest_acc_en>(4, 0, false);
     _llk_math_dest_section_done_<DstSync::SyncFull,is_fp32_dest_acc_en>();
 }
 
