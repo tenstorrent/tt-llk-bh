@@ -77,6 +77,8 @@ if [[ "$REUSE" == false ]]; then
     export CHIP_ARCH="$result"
     echo "CHIP_ARCH is: $CHIP_ARCH"
 
+    sudo apt-get install git-lfs
+
     # Install torch and related packages
     echo "Installing PyTorch and related packages..."
     pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cpu
