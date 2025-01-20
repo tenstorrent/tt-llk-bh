@@ -115,7 +115,7 @@ inline void bitonic_topk_ph3_st4_to_1(bool dir, bool &init_replay, int replay_st
     
     if (dir == (bool)SortDir::ArgMin) {
         TT_LOG("Issue max/min reverse");
-        TTI_SFPCONFIG(0x104, 0xF, 1);      // Reverse the max/min behaviour of SWAP 0b0001 0000 0100
+        TTI_SFPCONFIG(0x104, 0xF, 1);      // Reverse the max/min behaviour of SWAP
         TTI_SFPNOP;
         TTI_SFPNOP;
     }
