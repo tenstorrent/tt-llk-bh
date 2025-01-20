@@ -30,10 +30,12 @@ def bytes_to_int32(byte_list):
     return torch.tensor(unpacked_value, dtype=torch.int32)
 
 def unpack_fp16(packed_list):
-    return [bytes_to_float16(packed_list[i:i + 2]).item() for i in range(0, len(packed_list), 2)]
+    limited_packed_list = packed_list[:2048]
+    return [bytes_to_float16(limited_packed_list[i:i + 2]).item() for i in range(0, len(limited_packed_list), 2)]
 
 def unpack_bfp16(packed_list):
-    return [bytes_to_bfloat16(packed_list[i:i + 2]).item() for i in range(0, len(packed_list), 2)]
+    limited_packed_list = packed_list[:2048]
+    return [bytes_to_bfloat16(limited_packed_list[i:i + 2]).item() for i in range(0, len(limited_packed_list), 2)]
 
 def unpack_float32(packed_list):
     return [bytes_to_float32(packed_list[i:i + 4]).item() for i in range(0, len(packed_list), 4)]

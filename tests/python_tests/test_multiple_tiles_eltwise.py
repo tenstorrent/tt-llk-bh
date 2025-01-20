@@ -34,10 +34,6 @@ def test_multiple_kernels(format, testname, tile_cnt, mathop, dest_acc):
     pack_start_address = 0x1a000 + 2*4096*tile_cnt
     pack_addresses = [pack_start_address + 0x1000 * i for i in range(tile_cnt)]
 
-    print("\n\n PACK ADDRESSES \n\n")
-    for address in pack_addresses:
-        print(hex(address))
-
     unpack_kernels = [2] * tile_cnt
     pack_kernels = [1] * tile_cnt
     math_kernels = [mathop] * tile_cnt
@@ -72,9 +68,10 @@ def test_multiple_kernels(format, testname, tile_cnt, mathop, dest_acc):
     #check resluts from multiple tiles
 
     read_words_cnt = calculate_read_words_cnt(format,src_A)
-    read_data = read_words_from_device("0,0", pack_start_address, word_count=read_words_cnt*tile_cnt)
+    read_data = read_words_from_device("0,0", pack_start_address, word_count=1024*tile_cnt)
     read_data_bytes = flatten_list([int_to_bytes_list(data) for data in read_data])
-    sublist_size = read_words_cnt * 4
+    sublist_size = len(read_data_bytes)//tile_cnt
+    
     res_sublists = []
     for i in range(tile_cnt):
         res_sublists.append(read_data_bytes[i*sublist_size: i*sublist_size+sublist_size])
@@ -82,10 +79,25 @@ def test_multiple_kernels(format, testname, tile_cnt, mathop, dest_acc):
     res_from_L1 = []
 
     for sublist in res_sublists:
+        print("\n"*5)
+        print(len(get_result_from_device(format,sublist)))
+        print("\n"*5)
         res_from_L1.append(get_result_from_device(format,sublist))
 
+    print(res_from_L1[0])
+    print("*"*100)
+    print(golden[0:1024])      
+    print("^"*200)
+    print("\n\n")
+    print(res_from_L1[1])
+    print("*"*100)
+    print(golden[1025:])   
+
     res_from_L1 = flatten_list(res_from_L1)
-    
+
+    # print(res_from_L1[0:10])
+    # print(golden[0:10])
+
     golden_tensor = torch.tensor(golden, dtype=format_dict[format] if format in ["Float16", "Float16_b"] else torch.bfloat16)
     res_tensor = torch.tensor(res_from_L1, dtype=format_dict[format] if format in ["Float16", "Float16_b"] else torch.bfloat16)
 
