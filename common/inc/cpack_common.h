@@ -534,16 +534,13 @@ namespace ckernel::packer
       return config.f;
    }
 
-   inline std::array<pack_config_t, 4> read_pack_config() {
-      std::array<pack_config_t, 4> config_vec;
+   inline std::array<pack_config_t, 1> read_pack_config() {
+      std::array<pack_config_t, 1> config_vec;
       
       // Get pointer to registers for current state ID 
       volatile uint tt_reg_ptr* cfg = get_cfg_pointer();
 
       config_vec[0] = read_pack_config_helper(THCON_SEC0_REG1_Row_start_section_size_ADDR32, cfg);
-      config_vec[1] = read_pack_config_helper(THCON_SEC0_REG8_Row_start_section_size_ADDR32, cfg);
-      config_vec[2] = read_pack_config_helper(THCON_SEC1_REG1_Row_start_section_size_ADDR32, cfg);
-      config_vec[3] = read_pack_config_helper(THCON_SEC1_REG8_Row_start_section_size_ADDR32, cfg);
 
       return config_vec;
    }
@@ -579,16 +576,13 @@ namespace ckernel::packer
       return edge.f;
    }
 
-   inline std::array<pck_edge_offset_t, 4> read_pack_edge_offset() {
-      std::array<pck_edge_offset_t, 4> edge_vec;
+   inline std::array<pck_edge_offset_t, 1> read_pack_edge_offset() {
+      std::array<pck_edge_offset_t, 1> edge_vec;
 
       // Get pointer to registers for current state ID 
       volatile uint tt_reg_ptr* cfg = get_cfg_pointer();
 
       edge_vec[0] = read_pack_edge_offset_helper(PCK_EDGE_OFFSET_SEC0_mask_ADDR32, cfg);
-      edge_vec[1] = read_pack_edge_offset_helper(PCK_EDGE_OFFSET_SEC1_mask_ADDR32, cfg);
-      edge_vec[2] = read_pack_edge_offset_helper(PCK_EDGE_OFFSET_SEC2_mask_ADDR32, cfg);
-      edge_vec[3] = read_pack_edge_offset_helper(PCK_EDGE_OFFSET_SEC3_mask_ADDR32, cfg);
 
       return edge_vec; 
    }
@@ -600,16 +594,13 @@ namespace ckernel::packer
       return counters.f;      
    }
 
-   inline std::array<pack_counters_t, 4> read_pack_counters() {
-      std::array<pack_counters_t, 4> config_vec;
+   inline std::array<pack_counters_t, 1> read_pack_counters() {
+      std::array<pack_counters_t, 1> config_vec;
 
       // Get pointer to registers for current state ID 
       volatile uint tt_reg_ptr* cfg = get_cfg_pointer();
 
       config_vec[0] = read_pack_counters_helper(PACK_COUNTERS_SEC0_pack_per_xy_plane_ADDR32, cfg);
-      config_vec[1] = read_pack_counters_helper(PACK_COUNTERS_SEC1_pack_per_xy_plane_ADDR32, cfg);
-      config_vec[2] = read_pack_counters_helper(PACK_COUNTERS_SEC2_pack_per_xy_plane_ADDR32, cfg);
-      config_vec[3] = read_pack_counters_helper(PACK_COUNTERS_SEC3_pack_per_xy_plane_ADDR32, cfg);
 
       return config_vec; 
    }
