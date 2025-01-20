@@ -115,7 +115,7 @@ inline void bitonic_topk_ph3_st4_to_1(bool dir, bool &init_replay, int replay_st
     
     if (dir == (bool)SortDir::ArgMin) {
         TT_LOG("Issue max/min reverse");
-        TTI_SFPCONFIG(0x104, 0xF, 1);      // Reverse the max/min behaviour of SWAP
+        TTI_SFPCONFIG(0x104, 0xF, 1);      // Reverse the max/min behaviour of SWAP 0b0001 0000 0100
         TTI_SFPNOP;
         TTI_SFPNOP;
     }
@@ -389,7 +389,7 @@ inline void _bitonic_topk_phases_steps(
 }
 
 template <bool APPROXIMATION_MODE, int ITERATIONS>
-inline void _bitonic_topk_merge(const int m_iter, const int k)
+inline void _bitonic_topk_merge(const bool idir, const int m_iter, const int k)
 {
     uint dst_addr_offset = 0;
     for (int face=0; face<2; face++) {
@@ -407,7 +407,7 @@ inline void _bitonic_topk_merge(const int m_iter, const int k)
             while (datums_compared < total_datums_to_compare) {
                 for (uint ii=0; ii<inner_d; ii++) {
                     bitonic_topk_load8(dst_offset, ld_dist);
-                    TTI_SFPSWAP(0, p_sfpu::LREG0, p_sfpu::LREG1, p_sfpswap::ALL_ROWS_MAX);
+                    TT_SFPSWAP(0, !idir ? p_sfpu::LREG0 : p_sfpu::LREG1, !idir ? p_sfpu::LREG1 : p_sfpu::LREG0, p_sfpswap::ALL_ROWS_MAX);
                     bitonic_topk_store8(dst_offset, ld_dist);
                     datums_compared += 8;
                     if (ii == (inner_d-1)) {
