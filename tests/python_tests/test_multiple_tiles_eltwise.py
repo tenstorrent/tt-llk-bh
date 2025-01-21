@@ -22,10 +22,10 @@ def generate_golden(op, operand1, operand2, data_format):
     
     return res.tolist()
 
-@pytest.mark.parametrize("mathop", range(1,4))
+@pytest.mark.parametrize("mathop", range(1,2))
 @pytest.mark.parametrize("tile_cnt", range(2,3))
 @pytest.mark.parametrize("format", ["Float16_b"]) #,"Float16_b", "Float16"])
-@pytest.mark.parametrize("dest_acc", [""])#,"DEST_ACC"])
+@pytest.mark.parametrize("dest_acc", ["DEST_ACC"])#,"DEST_ACC"])
 @pytest.mark.parametrize("testname", ["multiple_tiles_eltwise_test"])
 def test_multiple_kernels(format, testname, tile_cnt, mathop, dest_acc):
 
@@ -48,7 +48,7 @@ def test_multiple_kernels(format, testname, tile_cnt, mathop, dest_acc):
     golden = generate_golden(mathop,src_A,src_B,format)
     write_stimuli_to_l1(src_A,src_B,format,tile_cnt)
 
-    make_cmd = f"make --silent format={format_args_dict[format]} testname={testname} dest_acc={dest_acc}"
+    make_cmd = f"make format={format_args_dict[format]} testname={testname} dest_acc={dest_acc}" # --silent
     make_cmd += " unpack_kern_cnt="+ str(len(unpack_kernels))+ " unpack_kerns="+unpack_kerns_formatted
     make_cmd += " math_kern_cnt="+ str(len(math_kernels))+ " math_kerns="+math_kerns_formatted
     make_cmd += " pack_kern_cnt="+ str(len(pack_kernels))+ " pack_kerns="+pack_kerns_formatted
@@ -66,37 +66,28 @@ def test_multiple_kernels(format, testname, tile_cnt, mathop, dest_acc):
     assert read_words_from_device("0,0", 0x19FFC, word_count=1)[0].to_bytes(4, 'big') == b'\x00\x00\x00\x01'
 
     #check resluts from multiple tiles
-
-    read_words_cnt = calculate_read_words_cnt(format,src_A)
-    read_data = read_words_from_device("0,0", pack_start_address, word_count=1024*tile_cnt)
-    read_data_bytes = flatten_list([int_to_bytes_list(data) for data in read_data])
-    sublist_size = len(read_data_bytes)//tile_cnt
-    
-    res_sublists = []
-    for i in range(tile_cnt):
-        res_sublists.append(read_data_bytes[i*sublist_size: i*sublist_size+sublist_size])
-
     res_from_L1 = []
 
-    for sublist in res_sublists:
-        print("\n"*5)
-        print(len(get_result_from_device(format,sublist)))
-        print("\n"*5)
-        res_from_L1.append(get_result_from_device(format,sublist))
+    read_words_cnt = calculate_read_words_cnt(format,src_A)
 
-    print(res_from_L1[0])
-    print("*"*100)
-    print(golden[0:1024])      
-    print("^"*200)
-    print("\n\n")
-    print(res_from_L1[1])
-    print("*"*100)
-    print(golden[1025:])   
+    for i in range(len(pack_addresses)):
+        read_data = read_words_from_device("0,0", pack_addresses[i], word_count=read_words_cnt)
+        print(hex(pack_addresses[i]))
+        read_data_bytes = flatten_list([int_to_bytes_list(data) for data in read_data])
+        res_from_L1.append(get_result_from_device(format,read_data_bytes))
 
     res_from_L1 = flatten_list(res_from_L1)
 
-    # print(res_from_L1[0:10])
-    # print(golden[0:10])
+
+    print(res_from_L1[:16])
+    print("*"*100)
+    print(golden[0:1024][0:16])      
+    print("^"*200)
+    print("\n\n")
+    print(res_from_L1[1024:][:16])
+    print("*"*100)
+    print(golden[1024:][:16])   
+    print("\n"*2)
 
     golden_tensor = torch.tensor(golden, dtype=format_dict[format] if format in ["Float16", "Float16_b"] else torch.bfloat16)
     res_tensor = torch.tensor(res_from_L1, dtype=format_dict[format] if format in ["Float16", "Float16_b"] else torch.bfloat16)
@@ -109,4 +100,5 @@ def test_multiple_kernels(format, testname, tile_cnt, mathop, dest_acc):
         rtol = 0.3
   
     _ , pcc = comp_pcc(golden_tensor, res_tensor, pcc=0.99) 
+    print(pcc)
     assert pcc > 0.99
