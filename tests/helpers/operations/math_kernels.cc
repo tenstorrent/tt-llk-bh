@@ -22,11 +22,12 @@
     }
 
     void elwadd_kernel(int i){
-        if(i==0 || (i!=0 && kernels[i] != kernels[i-1])){
-            math_init(i);
-        }
+        // if(i==0 || ((i!=0) && (kernels[i] != kernels[i-1]))){
+        //     math_init(i);
+        // }
+        math_init(i);
         _llk_math_wait_for_dest_available_<DstSync::SyncFull>();
-        _llk_math_eltwise_binary_<EltwiseBinaryType::ELWADD, BroadcastType::NONE,DstSync::SyncFull, 0, EltwiseBinaryReuseDestType::NONE, is_fp32_dest_acc_en>(4, 0, false);
+        _llk_math_eltwise_binary_<EltwiseBinaryType::ELWADD, BroadcastType::NONE,DstSync::SyncFull, 0, EltwiseBinaryReuseDestType::NONE, is_fp32_dest_acc_en>(4, 0, true);
         _llk_math_dest_section_done_<DstSync::SyncFull,is_fp32_dest_acc_en>();
     }
 
@@ -48,4 +49,4 @@
         _llk_math_dest_section_done_<DstSync::SyncFull,is_fp32_dest_acc_en>();
     }
 
-    //TODO: ADD MORE
+    //TODO: ADD MORE: DATACOPY, MATMUL

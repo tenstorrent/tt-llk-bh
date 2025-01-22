@@ -27,16 +27,20 @@
     }
 
     inline void unpack_init(){
+        zerosrc();
         _llk_unpack_AB_hw_configure_<is_fp32_dest_acc_en, StochRndType::None>(DATA_FORMAT, DATA_FORMAT, DATA_FORMAT, DATA_FORMAT);
         _llk_unpack_AB_init_<>();
     }
 
     #ifdef UNPACK_A_ADDRS
     void unpack_AB_kernel(int index){
-        if(index == 0){
-            unpack_init();
-        }
+        // if(index == 0){
+        //     unpack_init();
+        // }
+        unpack_init();
         _llk_unpack_AB_<>((std::uint32_t)(buffer_A + index*TILE_SIZE_ELEMENTS)/16-1,(std::uint32_t)(buffer_B + index*TILE_SIZE_ELEMENTS)/16-1);
+        (*((volatile uint32_t*)0x16ff0 + index)) = (std::uint32_t)buffer_A + index*TILE_SIZE_ELEMENTS;
+        (*((volatile uint32_t*)0x15ff0 + index)) = (std::uint32_t)buffer_B + index*TILE_SIZE_ELEMENTS;
     }
     #else
     void unpack_AB_kernel(int param = 0){

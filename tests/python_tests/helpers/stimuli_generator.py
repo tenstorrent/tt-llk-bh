@@ -4,11 +4,14 @@ from .dictionaries import *
 def flatten_list(sublists):
     return [item for sublist in sublists for item in sublist]
 
-def generate_random_face(stimuli_format = "Float16_b"):
+def generate_random_face(a , stimuli_format = "Float16_b"):
 
     if(stimuli_format == "Float16" or stimuli_format == "Float16_b"): 
         #srcA_face = torch.rand(256, dtype = format_dict[stimuli_format]) + 2 # because of log
-        srcA_face = torch.ones(256, dtype = format_dict[stimuli_format]) * 4
+        if a == 1:
+            srcA_face = torch.ones(256, dtype = format_dict[stimuli_format]) * 0
+        else:
+            srcA_face = torch.ones(256, dtype = format_dict[stimuli_format]) * 4
     elif(stimuli_format == "Bfp8_b"):
         size = 256
         integer_part = torch.randint(0, 10, (size,))  
@@ -22,7 +25,7 @@ def generate_random_face(stimuli_format = "Float16_b"):
     return srcA_face
 
 def generate_random_face_ab(stimuli_format):
-    return generate_random_face(stimuli_format), generate_random_face(stimuli_format)
+    return generate_random_face(1,stimuli_format), generate_random_face(0,stimuli_format)
 
 def generate_stimuli(stimuli_format = "Float16_b", tile_cnt = 1, sfpu = False):
 
