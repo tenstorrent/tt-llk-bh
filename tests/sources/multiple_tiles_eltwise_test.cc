@@ -22,12 +22,6 @@ const bool is_fp32_dest_acc_en = false;
 #include "llk_unpack_common.h"
 #include "params.h"
 
-// volatile uint32_t* buffer_A[2] = {(volatile uint32_t*)0x1a000, (volatile uint32_t*)0x1b000};
-// volatile uint32_t* buffer_B[2] = {(volatile uint32_t*)0x1c000, (volatile uint32_t*)0x1d000};
-
-// volatile uint32_t* buffer_A = (volatile uint32_t*)0x1a000;
-// volatile uint32_t* buffer_B = (volatile uint32_t*)0x1a000 + KERN_CNT*0x1000;
-
 volatile uint32_t* buffer_A[KERN_CNT];
 volatile uint32_t* buffer_B[KERN_CNT];
 
@@ -64,7 +58,6 @@ void run_kernel()
     for(int index = 0; index < KERN_CNT; index++){
 
         _llk_math_wait_for_dest_available_<DstSync::SyncFull>();
-        //_llk_math_eltwise_binary_<ELTWISE_BINARY_OP, BroadcastType::NONE,DstSync::SyncFull>(4, 0, true);
         _llk_math_eltwise_binary_<ELTWISE_BINARY_OP, BroadcastType::NONE,DstSync::SyncFull, 0, EltwiseBinaryReuseDestType::NONE, is_fp32_dest_acc_en>(4, 0, false);
         _llk_math_dest_section_done_<DstSync::SyncFull,is_fp32_dest_acc_en>();
     }
@@ -77,8 +70,6 @@ void run_kernel()
 #include "llk_pack.h"
 #include "llk_pack_common.h"
 #include "params.h"
-
-//volatile uint32_t* buffer_Dest[2] = {(volatile uint32_t*)0x1e000, (volatile uint32_t*)0x1f000};
 
 volatile uint32_t* buffer_Dest[KERN_CNT];
 
