@@ -7,11 +7,11 @@ def flatten_list(sublists):
 def generate_random_face(a , stimuli_format = "Float16_b"):
 
     if(stimuli_format == "Float16" or stimuli_format == "Float16_b"): 
-        #srcA_face = torch.rand(256, dtype = format_dict[stimuli_format]) + 2 # because of log
-        if a == 1:
-            srcA_face = torch.ones(256, dtype = format_dict[stimuli_format]) * 0
-        else:
-            srcA_face = torch.ones(256, dtype = format_dict[stimuli_format]) * 4
+        srcA_face = torch.rand(256, dtype = format_dict[stimuli_format]) + 2 # because of log
+        # if a == 1:
+        #     srcA_face = torch.ones(256, dtype = format_dict[stimuli_format]) * 1
+        # else:
+        #     srcA_face = torch.ones(256, dtype = format_dict[stimuli_format]) * 3
     elif(stimuli_format == "Bfp8_b"):
         size = 256
         integer_part = torch.randint(0, 10, (size,))  

@@ -47,7 +47,6 @@ ifeq ($(testname), multiple_ops_test)
 	OPTIONS_PACK+=-DPACK_ADDRS=$(pack_addrs) 
 else ifeq ($(testname), multiple_tiles_eltwise_test)
 	MULTIPLE_OPS:=-DMULTIPLE_OPS
-	OPTIONS_UNPACK+=-DTILE_SIZE_ELEMENTS=4096
 	OPTIONS_UNPACK:=-DKERN_CNT=$(kern_cnt) 
 	OPTIONS_MATH:=-DKERN_CNT=$(kern_cnt) 
 	OPTIONS_PACK:=-DKERN_CNT=$(kern_cnt) 
@@ -61,7 +60,7 @@ else
 	OPTIONS_PACK= 
 endif
 
-OPTIONS_COMPILE+=$(FORMAT_ARG) $(MATHOP_ARG)
+OPTIONS_COMPILE+=$(FORMAT_ARG) $(MATHOP_ARG) -DTILE_SIZE_CNT=0x1000
 OPTIONS_COMPILE+=$(INCLUDES)
 
 ifeq ($(dest_acc), DEST_ACC) 

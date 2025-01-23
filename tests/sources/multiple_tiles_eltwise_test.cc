@@ -22,16 +22,27 @@ const bool is_fp32_dest_acc_en = false;
 #include "llk_unpack_common.h"
 #include "params.h"
 
-volatile uint32_t* buffer_A[2] = {(volatile uint32_t*)0x1a000, (volatile uint32_t*)0x1b000};
-volatile uint32_t* buffer_B[2] = {(volatile uint32_t*)0x1c000, (volatile uint32_t*)0x1d000};
+// volatile uint32_t* buffer_A[2] = {(volatile uint32_t*)0x1a000, (volatile uint32_t*)0x1b000};
+// volatile uint32_t* buffer_B[2] = {(volatile uint32_t*)0x1c000, (volatile uint32_t*)0x1d000};
+
+// volatile uint32_t* buffer_A = (volatile uint32_t*)0x1a000;
+// volatile uint32_t* buffer_B = (volatile uint32_t*)0x1a000 + KERN_CNT*0x1000;
+
+volatile uint32_t* buffer_A[KERN_CNT];
+volatile uint32_t* buffer_B[KERN_CNT];
 
 void run_kernel()
 {
+    for(int i=0; i< KERN_CNT; i++){
+        buffer_A[i] = (volatile uint32_t*)(0x1a000 + i*TILE_SIZE_CNT);
+        buffer_B[i] = (volatile uint32_t*)(0x1a000 + TILE_SIZE_CNT*KERN_CNT + i*TILE_SIZE_CNT);
+    }
+
     _llk_unpack_AB_hw_configure_<is_fp32_dest_acc_en, StochRndType::None>(DATA_FORMAT, DATA_FORMAT, DATA_FORMAT, DATA_FORMAT);
     _llk_unpack_AB_init_<>();
     
     for(int index = 0; index < KERN_CNT; index++){
-        _llk_unpack_AB_<>((std::uint32_t)buffer_A[index]/16-1,(std::uint32_t)buffer_B[index]/16-1);
+        _llk_unpack_AB_<>(((std::uint32_t)buffer_A[index])/16-1,((std::uint32_t)buffer_B[index])/16-1);
     }
 
 }
@@ -67,10 +78,14 @@ void run_kernel()
 #include "llk_pack_common.h"
 #include "params.h"
 
-volatile uint32_t* buffer_Dest[2] = {(volatile uint32_t*)0x1e000, (volatile uint32_t*)0x1f000}; 
+//volatile uint32_t* buffer_Dest[2] = {(volatile uint32_t*)0x1e000, (volatile uint32_t*)0x1f000};
+
+volatile uint32_t* buffer_Dest[KERN_CNT];
 
 void run_kernel()
 {
+    process_addresses(buffer_Dest,KERN_CNT,PACK_ADDRS);
+
     _llk_pack_hw_configure_<false, is_fp32_dest_acc_en, false>(DATA_FORMAT, DATA_FORMAT, 16*16*4);
     _llk_pack_init_<false, false, DstTileFaceLayout::RowMajor, false>(DATA_FORMAT);
     #ifdef ARCH_BLACKHOLE

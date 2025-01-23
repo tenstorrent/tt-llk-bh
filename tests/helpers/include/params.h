@@ -1,13 +1,10 @@
 #ifndef PARAMS_H
 #define PARAMS_H
 
-typedef void (*kernel_func)(int);
+#include <cstdint>
+#include <cstdarg>
 
 #ifdef LLK_TRISC_UNPACK
-	
-	#ifdef MULTIPLE_OPS
-		#include "unpack_kernels.h"
-	#endif
 
     #ifdef FORMAT_FLOAT16_B
         #define DATA_FORMAT (uint32_t)DataFormat::Float16_b
@@ -28,10 +25,6 @@ typedef void (*kernel_func)(int);
 #endif
 
 #ifdef LLK_TRISC_MATH
-
-    #ifdef MULTIPLE_OPS
-		#include "math_kernels.h"
-	#endif
 
     #ifdef FORMAT_FLOAT16_B
         #define DATA_FORMAT (uint32_t)DataFormat::Float16_b
@@ -76,9 +69,18 @@ typedef void (*kernel_func)(int);
 
 #ifdef LLK_TRISC_PACK
 
-    #ifdef MULTIPLE_OPS
-		#include "pack_kernels.h"
-	#endif
+
+inline void process_addresses(volatile uint32_t* buffer_Dest[], int n, int first, ...) {
+    buffer_Dest[0] = (volatile uint32_t*)first;
+
+    va_list args;
+    va_start(args, first);
+    for (int i = 1; i < n; ++i) {
+        int num = va_arg(args, int);
+        buffer_Dest[i] = (volatile uint32_t*)num;
+    }
+    va_end(args);
+}
 
     #ifdef FORMAT_FLOAT16_B
         #define DATA_FORMAT (uint32_t)DataFormat::Float16_b
