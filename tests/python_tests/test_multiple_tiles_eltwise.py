@@ -25,7 +25,7 @@ def generate_golden(op, operand1, operand2, data_format):
 @pytest.mark.parametrize("mathop", range(1,2))
 @pytest.mark.parametrize("tile_cnt", range(2,3))
 @pytest.mark.parametrize("format", ["Float16_b"]) #,"Float16_b", "Float16"])
-@pytest.mark.parametrize("dest_acc", ["DEST_ACC"])#,"DEST_ACC"])
+@pytest.mark.parametrize("dest_acc", [""])#,"DEST_ACC"])
 @pytest.mark.parametrize("testname", ["multiple_tiles_eltwise_test"])
 def test_multiple_kernels(format, testname, tile_cnt, mathop, dest_acc):
 
@@ -33,14 +33,6 @@ def test_multiple_kernels(format, testname, tile_cnt, mathop, dest_acc):
 
     pack_start_address = 0x1a000 + 2*4096*tile_cnt
     pack_addresses = [pack_start_address + 0x1000 * i for i in range(tile_cnt)]
-
-    unpack_kernels = [2] * tile_cnt
-    pack_kernels = [1] * tile_cnt
-    math_kernels = [mathop] * tile_cnt
-
-    unpack_kerns_formatted = format_kernel_list(unpack_kernels)
-    math_kerns_formatted = format_kernel_list(math_kernels)
-    pack_kerns_formatted = format_kernel_list(pack_kernels)
     pack_addresses_formatted = format_kernel_list(pack_addresses, as_hex=True)
 
     #context = init_debuda()
@@ -49,11 +41,17 @@ def test_multiple_kernels(format, testname, tile_cnt, mathop, dest_acc):
     write_stimuli_to_l1(src_A,src_B,format,tile_cnt)
 
     make_cmd = f"make format={format_args_dict[format]} testname={testname} dest_acc={dest_acc}" # --silent
-    make_cmd += " unpack_kern_cnt="+ str(len(unpack_kernels))+ " unpack_kerns="+unpack_kerns_formatted
-    make_cmd += " math_kern_cnt="+ str(len(math_kernels))+ " math_kerns="+math_kerns_formatted
-    make_cmd += " pack_kern_cnt="+ str(len(pack_kernels))+ " pack_kerns="+pack_kerns_formatted
+    make_cmd += " kern_cnt=" + str(tile_cnt)
     make_cmd += " pack_addr_cnt="+ str(len(pack_addresses))+ " pack_addrs="+pack_addresses_formatted
     make_cmd += " unpack_a_addr_cnt="+str(tile_cnt)
+
+    if(mathop == 1):
+        make_cmd += " mathop=ELTWISE_BINARY_ADD "
+    elif(mathop == 2):
+        make_cmd += " mathop=ELTWISE_BINARY_SUB "
+    else:
+        make_cmd += " mathop=ELTWISE_BINARY_MUL "
+
 
     os.system(f"cd .. && {make_cmd}")
 
@@ -69,12 +67,11 @@ def test_multiple_kernels(format, testname, tile_cnt, mathop, dest_acc):
     res_from_L1 = []
 
     read_words_cnt = calculate_read_words_cnt(format,src_A)
-
-    for i in range(len(pack_addresses)):
-        read_data = read_words_from_device("0,0", pack_addresses[i], word_count=read_words_cnt)
-        print(hex(pack_addresses[i]))
+    for address in pack_addresses:
+        read_data = read_words_from_device("0,0", address, word_count=read_words_cnt)
         read_data_bytes = flatten_list([int_to_bytes_list(data) for data in read_data])
         res_from_L1.append(get_result_from_device(format,read_data_bytes))
+        
 
     res_from_L1 = flatten_list(res_from_L1)
 
@@ -96,8 +93,8 @@ def test_multiple_kernels(format, testname, tile_cnt, mathop, dest_acc):
         atol = 0.05
         rtol = 0.1
     elif(format == "Bfp8_b"):
-        atol = 0.4
-        rtol = 0.3
+        atol = 0.1
+        rtol = 0.2
   
     _ , pcc = comp_pcc(golden_tensor, res_tensor, pcc=0.99) 
     print(pcc)
