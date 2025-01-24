@@ -22,13 +22,11 @@ import torch
 
 def calculate_read_words_cnt(format,src_A):
     if(format == "Float16" or format == "Float16_b"):
-        read_words_cnt = len(src_A)//2
+        return 512
     elif( format == "Bfp8_b"):
-        read_words_cnt = len(src_A)//4 + 32 # 272 for one tile
+        return 282
     elif( format == "Float32" or format == "Int32"):
-        read_words_cnt = len(src_A)
-    
-    return read_words_cnt
+        return 1024
 
 def tilize(original_tensor, stimuli_format="Float16_b"):
 

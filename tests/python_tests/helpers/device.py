@@ -17,19 +17,7 @@ def write_stimuli_to_l1(buffer_A, buffer_B, stimuli_format, tile_cnt = 1):
     buffer_A_address = 0x1a000
     buffer_B_address = 0x1a000 + 4096*tile_cnt
 
-    # if tile_cnt != 1:   
-    #     buffer_B_address = 0x1a000 + 1024*tile_cnt
-    #     buffer_A_address = 0x1a000
-    # else:
-    #     buffer_B_address = 0x1b000
-    #     buffer_A_address = 0x1a000
-
     for i in range(tile_cnt):
-
-        print("\n\n WRITING TILE TO A :")
-        print(hex(buffer_A_address))
-        print("\n\n WRITING TILE TO B :")
-        print(hex(buffer_B_address))
 
         buffer_A_tile = buffer_A[1024*i: 1024*i+1024]
         buffer_B_tile = buffer_B[1024*i: 1024*i+1024]

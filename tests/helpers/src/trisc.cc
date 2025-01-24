@@ -31,14 +31,6 @@ int main()
 	reset_cfg_state_id();
 	reset_dest_offset_id();
 
-	// #ifdef MULTIPLE_OPS
-	// // needs these 2 defines when compiling
-	// PROCESS_NUMBERS(KERN_CNT, KERNS);
-	// 	#ifdef LLK_TRISC_PACK
-	// 		PROCESS_ADDRESSES(PACK_ADDR_CNT,PACK_ADDRS);
-	// 	#endif
-	// #endif
-
 	tensix_sync();
     run_kernel();
 
