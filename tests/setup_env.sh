@@ -84,7 +84,8 @@ if [[ "$REUSE" == false ]]; then
     pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cpu
 
     # **************** DOWNLOAD & INSTALL TT-LENS ****************************
-    pip install git+https://github.com/tenstorrent/tt-lens.git@d4ce04c3d4e68cccdf0f53b0b5748680a8a573ed
+    pip install git+https://github.com/tenstorrent/tt-lens.git@d968f1215b5fde25a9cf41522452b055854e609f
+    
 
     # **************** DOWNLOAD & INSTALL SFPI ****************************
     echo "Downloading SFPI release..."
