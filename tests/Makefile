@@ -33,12 +33,6 @@ else
 	MATHOP_ARG:=-D$(mathop) 
 endif
 
-ifeq ($(math_kernels),)
-    MATHOP_ARG =
-else
-	MATHOP_ARG:=-DMATHOPS=$(math_kernels) 
-endif
-
 # If test needs to run muliple consecutive operations it needs some additional
 # files to be linked to it
 ifeq ($(testname), multiple_tiles_eltwise_test)
