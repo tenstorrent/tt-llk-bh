@@ -40,10 +40,8 @@ def test_all(format, mathop, testname, dest_acc):
     os.system(f"cd .. && {make_cmd}")
 
     run_elf_files(testname)
-    read_words_cnt = calculate_read_words_cnt(format,src_A)
-    read_data = read_words_from_device("0,0", 0x1c000, word_count=read_words_cnt)
-    read_data_bytes = flatten_list([int_to_bytes_list(data) for data in read_data])
-    res_from_L1 = get_result_from_device(format,read_data_bytes)
+    
+    res_from_L1 = collect_results(format,src_A,sfpu=True)
     
     assert len(res_from_L1) == len(golden)
 
