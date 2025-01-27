@@ -14,7 +14,8 @@ def generate_golden(operation, operand1, operand2, data_format):
     operations = {
         "elwadd": tensor1_float + tensor2_float,
         "elwsub": tensor1_float - tensor2_float,
-        "elwmul": tensor1_float * tensor2_float
+        "elwmul": tensor1_float * tensor2_float,
+        "elwdiv": tensor1_float / tensor2_float
     }
     
     if operation not in operations:
