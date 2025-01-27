@@ -69,7 +69,6 @@
 
 #ifdef LLK_TRISC_PACK
 
-
 inline void process_addresses(volatile uint32_t* buffer_Dest[], int n, int first, ...) {
     buffer_Dest[0] = (volatile uint32_t*)first;
 

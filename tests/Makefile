@@ -33,19 +33,15 @@ else
 	MATHOP_ARG:=-D$(mathop) 
 endif
 
+ifeq ($(math_kernels),)
+    MATHOP_ARG =
+else
+	MATHOP_ARG:=-DMATHOPS=$(math_kernels) 
+endif
+
 # If test needs to run muliple consecutive operations it needs some additional
 # files to be linked to it
-ifeq ($(testname), multiple_ops_test)
-	MULTIPLE_OPS:=-DMULTIPLE_OPS
-	OPTIONS_UNPACK:=-DKERN_CNT=$(unpack_kern_cnt) 
-	OPTIONS_UNPACK+=-DKERNS=$(unpack_kerns) 
-	OPTIONS_MATH:=-DKERN_CNT=$(math_kern_cnt) 
-	OPTIONS_MATH+=-DKERNS=$(math_kerns) 
-	OPTIONS_PACK:=-DKERN_CNT=$(pack_kern_cnt) 
-	OPTIONS_PACK+=-DKERNS=$(pack_kerns) 
-	OPTIONS_PACK+=-DPACK_ADDR_CNT=$(pack_addr_cnt) 
-	OPTIONS_PACK+=-DPACK_ADDRS=$(pack_addrs) 
-else ifeq ($(testname), multiple_tiles_eltwise_test)
+ifeq ($(testname), multiple_tiles_eltwise_test)
 	MULTIPLE_OPS:=-DMULTIPLE_OPS
 	OPTIONS_UNPACK:=-DKERN_CNT=$(kern_cnt) 
 	OPTIONS_MATH:=-DKERN_CNT=$(kern_cnt) 

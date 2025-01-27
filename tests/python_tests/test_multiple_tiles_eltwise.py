@@ -40,7 +40,7 @@ def test_multiple_kernels(format, testname, tile_cnt, mathop, dest_acc):
     golden = generate_golden(mathop,src_A,src_B,format)
     write_stimuli_to_l1(src_A,src_B,format,tile_cnt)
 
-    make_cmd = f" --silent make format={format_args_dict[format]} testname={testname} dest_acc={dest_acc}"
+    make_cmd = f" make --silent format={format_args_dict[format]} testname={testname} dest_acc={dest_acc}"
     make_cmd += " kern_cnt=" + str(tile_cnt)
     make_cmd += " pack_addr_cnt="+ str(len(pack_addresses))+ " pack_addrs="+pack_addresses_formatted
     make_cmd += " unpack_a_addr_cnt="+str(tile_cnt)
@@ -86,5 +86,4 @@ def test_multiple_kernels(format, testname, tile_cnt, mathop, dest_acc):
         rtol = 0.2
   
     _ , pcc = comp_pcc(golden_tensor, res_tensor, pcc=0.99) 
-    print(pcc)
     assert pcc > 0.99
