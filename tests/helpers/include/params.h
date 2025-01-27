@@ -52,10 +52,10 @@
         #define ELTWISE_BINARY_OP EltwiseBinaryType::ELWMUL
     #endif
     // TO BE IMPLEMENTED IN LLKs
-    #ifdef ELTWISE_BINARY_MUL
+    #ifdef ELTWISE_BINARY_DIV
         #define ELTWISE_BINARY_OP EltwiseBinaryType::ELWDIV
     #endif
-    #ifdef ELTWISE_BINARY_MUL
+    #ifdef ELTWISE_BINARY_LESS
         #define ELTWISE_BINARY_OP EltwiseBinaryType::ELWLESS
     #endif
 
