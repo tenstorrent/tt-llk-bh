@@ -20,7 +20,11 @@ def untilize(original_tensor,stimuli_format = "Float16_b"):
 
 import torch
 
-def calculate_read_words_cnt(format,src_A):
+def calculate_read_words_cnt(format,src_A, sfpu=False):
+
+    if sfpu == True: # for now just for 16 bit formats
+        return 128
+
     if(format == "Float16" or format == "Float16_b"):
         return 512
     elif( format == "Bfp8_b"):
