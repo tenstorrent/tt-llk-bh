@@ -36,16 +36,24 @@ def test_all(format, mathop, testname, dest_acc):
     golden = generate_golden(mathop, src_A, format)
     write_stimuli_to_l1(src_A, src_B, format)
 
-    make_cmd = f"make --silent format={format_args_dict[format]} mathop={mathop_args_dict[mathop]} testname={testname} dest_acc={dest_acc}"
+    test_config = {
+        "input_format": format,
+        "output_format": format,
+        "testname": testname,
+        "dest_acc": dest_acc,
+        "mathop": mathop
+    }
+
+    make_cmd = generate_make_command(test_config)
     os.system(f"cd .. && {make_cmd}")
 
     run_elf_files(testname)
     
     res_from_L1 = collect_results(format,src_A,sfpu=True)
-    
-    assert len(res_from_L1) == len(golden)
 
     os.system("cd .. && make clean")
+
+    assert len(res_from_L1) == len(golden)
 
     # Mailbox checks
     assert read_words_from_device("0,0", 0x19FF4, word_count=1)[0].to_bytes(4, 'big') == b'\x00\x00\x00\x01'
