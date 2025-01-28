@@ -142,12 +142,4 @@ if [[ "$REUSE" == true ]]; then
 
 fi
 
-# *************** COLLECT ALL TEST FILES ********************************
-
-PYTHON_TESTS="python_tests"
-OUTPUT_FILE="list_of_tests.txt"
-
-# List files starting with 'test_' and save it to the file
-ls "$PYTHON_TESTS"/test_* | xargs -n 1 basename > "$PYTHON_TESTS"/"$OUTPUT_FILE"
-
 echo "Script completed successfully!"

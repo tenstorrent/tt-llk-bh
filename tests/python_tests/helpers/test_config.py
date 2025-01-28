@@ -13,6 +13,26 @@ def generate_make_command(test_config):
     mathop = test_config.get("mathop", "no_mathop")
 
     if(mathop != "no_mathop"):
-        make_cmd += f"mathop={mathop_args_dict[mathop]}"
+        if isinstance(mathop,str): # single tile option
+            make_cmd += f"mathop={mathop_args_dict[mathop]}"
+        else: # multiple tiles handles mathop as int
+
+            if(mathop == 1):
+                make_cmd += " mathop=ELTWISE_BINARY_ADD "
+            elif(mathop == 2):
+                make_cmd += " mathop=ELTWISE_BINARY_SUB "
+            else:
+                make_cmd += " mathop=ELTWISE_BINARY_MUL "
+
+            kern_cnt = str(test_config.get("kern_cnt"))
+            pack_addr_cnt = str(test_config.get("pack_addr_cnt"))
+            pack_addrs = test_config.get("pack_addrs")
+            unpack_a_addrs_cnt = test_config.get("unpack_a_addrs_cnt")
+
+            make_cmd += f" kern_cnt={kern_cnt} "
+            make_cmd += f" pack_addr_cnt={pack_addr_cnt} pack_addrs={pack_addrs}" 
+            make_cmd += f" unpack_a_addrs_cnt={unpack_a_addrs_cnt}"
+
+
 
     return make_cmd

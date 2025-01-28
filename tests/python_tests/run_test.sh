@@ -47,23 +47,14 @@ done
 
 if [[ "$all_tests" = true ]]; then
     echo "Running all tests in current directory."
-
-    # Find all test files in the current directory that start with "test_"
     test_files=$(ls test_*.py)
 
-    # Iterate over each test file
     for test_file in $test_files; do
         echo "Running $test_file"
-        
-        # Run the test file with pytest
         pytest --color=yes -rA "$test_file"
-        
-        # Run the custom command after each test file
-        echo "Running tt-smi -r 0"
         tt-smi -r 0
-        
-        echo "---------------------------------"
     done
+    
     exit 0
 fi
 
