@@ -33,7 +33,15 @@ def test_all(format, mathop, testname, dest_acc):
     golden = generate_golden(mathop, src_A, src_B, format)
     write_stimuli_to_l1(src_A, src_B, format)
 
-    make_cmd = f"make --silent format={format_args_dict[format]} mathop={mathop_args_dict[mathop]} testname={testname} dest_acc={dest_acc}"
+    test_config = {
+        "input_format": format,
+        "output_format": format,
+        "testname": testname,
+        "dest_acc": dest_acc,
+        "mathop": mathop
+    }
+
+    make_cmd = generate_make_command(test_config)
     os.system(f"cd .. && {make_cmd}")
 
     run_elf_files(testname)
@@ -53,8 +61,8 @@ def test_all(format, mathop, testname, dest_acc):
         atol = 0.05
         rtol = 0.1
     elif(format == "Bfp8_b"):
-        atol = 0.4
-        rtol = 0.3
+        atol = 0.1
+        rtol = 0.2
 
     golden_tensor = torch.tensor(golden, dtype=format_dict[format] if format in ["Float16", "Float16_b"] else torch.bfloat16)
     res_tensor = torch.tensor(res_from_L1, dtype=format_dict[format] if format in ["Float16", "Float16_b"] else torch.bfloat16)
