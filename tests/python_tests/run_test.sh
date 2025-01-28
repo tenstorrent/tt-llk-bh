@@ -15,7 +15,7 @@ rm -rf *.log
 # Function to display usage instructions
 usage() {
     echo "Usage: $0 --repeat <number_of_repeats> --test <test_name> [--log <log_file>]"
-    echo "       $0 --all [--log <log_file>]"
+    echo "       $0 --all "
     exit 1
 }
 
@@ -45,17 +45,28 @@ while [[ $# -gt 0 ]]; do
     esac
 done
 
-# If --all is specified, run all tests listed in list_of_tests.txt
 if [[ "$all_tests" = true ]]; then
-    if [[ -n "$log_file" ]]; then
-        echo "Running all tests from list_of_tests.txt" | tee -a "$log_file"
-        pytest --color=yes -rA @list_of_tests.txt | tee -a "$log_file" 2>&1
-    else
-        echo "Running all tests from list_of_tests.txt"
-        pytest --color=yes -rA @list_of_tests.txt
-    fi
+    echo "Running all tests in current directory."
+
+    # Find all test files in the current directory that start with "test_"
+    test_files=$(ls test_*.py)
+
+    # Iterate over each test file
+    for test_file in $test_files; do
+        echo "Running $test_file"
+        
+        # Run the test file with pytest
+        pytest --color=yes -rA "$test_file"
+        
+        # Run the custom command after each test file
+        echo "Running tt-smi -r 0"
+        tt-smi -r 0
+        
+        echo "---------------------------------"
+    done
     exit 0
 fi
+
 
 # Ensure both parameters (--repeat and --test) are provided if not running all tests
 if [[ -z "$repeat_count" || -z "$test_name" ]]; then
