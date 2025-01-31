@@ -9,13 +9,14 @@ uint32_t unp_cfg_context = 0;
 uint32_t pack_sync_tile_dst_ptr = 0;
 volatile uint32_t tt_l1_ptr l1_buffer[16] __attribute__ ((section (".text#"))) __attribute__ ((aligned (16)));
 
+#define TF32 4
+#define BFP16 5
+
 #ifdef DEST_ACC
 const bool is_fp32_dest_acc_en = true;
 #else
 const bool is_fp32_dest_acc_en = false;
 #endif
-
-// const bool unpack_to_dest = true;
 
 #if defined(FORMAT_INT32) || defined(FORMAT_FLOAT32)
 const bool unpack_to_dest = true;
@@ -33,9 +34,15 @@ volatile uint32_t* buffer_A = (volatile uint32_t*)0x1a000;
 
 void run_kernel()
 {
-    _llk_unpack_A_hw_configure_<is_fp32_dest_acc_en, StochRndType::None>(DATA_FORMAT,DATA_FORMAT,FACE_R_DIM,0,4);
-    _llk_unpack_A_init_<BroadcastType::NONE, false, EltwiseBinaryReuseDestType::NONE, unpack_to_dest>(0, 0, FACE_R_DIM, 4, DATA_FORMAT,DATA_FORMAT);
-    _llk_unpack_A_<BroadcastType::NONE, false, EltwiseBinaryReuseDestType::NONE, unpack_to_dest>((((uint32_t)buffer_A)/16)-1, 0, DATA_FORMAT,DATA_FORMAT);
+    // *((volatile uint32_t*)0x15200) = (uint32_t)is_fp32_dest_acc_en;
+    // _llk_unpack_A_init_<BroadcastType::NONE, false, EltwiseBinaryReuseDestType::NONE, unpack_to_dest>(0, 0, FACE_R_DIM, 4, DATA_FORMAT,TF32);
+    // _llk_unpack_A_hw_configure_<is_fp32_dest_acc_en, StochRndType::None>(DATA_FORMAT,TF32,FACE_R_DIM,0,4);
+    // _llk_unpack_A_<BroadcastType::NONE, false, EltwiseBinaryReuseDestType::NONE, unpack_to_dest>((((uint32_t)buffer_A)/16)-1, 0, DATA_FORMAT,TF32);
+
+    _llk_unpack_A_init_<BroadcastType::NONE, false, EltwiseBinaryReuseDestType::NONE, unpack_to_dest>(0, 0, FACE_R_DIM, 4, DATA_FORMAT,TF32);
+    _llk_unpack_A_hw_configure_<is_fp32_dest_acc_en, StochRndType::None>(DATA_FORMAT,TF32,FACE_R_DIM,0,4);
+    _llk_unpack_A_<BroadcastType::NONE, false, EltwiseBinaryReuseDestType::NONE, unpack_to_dest>((((uint32_t)buffer_A)/16)-1, 0, DATA_FORMAT,TF32);
+
 }
 
 #endif
@@ -56,7 +63,7 @@ void run_kernel()
     _llk_math_pack_sync_init_<DstSync::SyncFull,is_fp32_dest_acc_en>();
     _llk_math_hw_configure_<false,false>(DATA_FORMAT, DATA_FORMAT);
     _llk_math_wait_for_dest_available_<DstSync::SyncFull>();
-    _llk_math_eltwise_unary_datacopy_<DataCopyType::A2D, DstSync::SyncFull, BroadcastType::NONE, is_fp32_dest_acc_en, unpack_to_dest>(0, DATA_FORMAT, DATA_FORMAT);
+    _llk_math_eltwise_unary_datacopy_<DataCopyType::A2D, DstSync::SyncFull, BroadcastType::NONE, is_fp32_dest_acc_en, unpack_to_dest>(0, TF32, DATA_FORMAT);
     _llk_math_dest_section_done_<DstSync::SyncFull,is_fp32_dest_acc_en>();
 }
 
