@@ -30,7 +30,8 @@ def generate_golden(operation, operand1, data_format):
 @pytest.mark.parametrize("testname", ["eltwise_unary_sfpu_test"])
 @pytest.mark.parametrize("mathop", ["sqrt", "log","square"])
 @pytest.mark.parametrize("dest_acc", ["","DEST_ACC"])
-def test_all(format, mathop, testname, dest_acc):
+@pytest.mark.parametrize("approx_mode", ["true","false"])
+def test_all(format, mathop, testname, dest_acc, approx_mode):
     #context = init_debuda()
     src_A,src_B = generate_stimuli(format,sfpu = True)
     golden = generate_golden(mathop, src_A, format)
@@ -41,7 +42,8 @@ def test_all(format, mathop, testname, dest_acc):
         "output_format": format,
         "testname": testname,
         "dest_acc": dest_acc,
-        "mathop": mathop
+        "mathop": mathop,
+        "approx_mode": approx_mode
     }
 
     make_cmd = generate_make_command(test_config)

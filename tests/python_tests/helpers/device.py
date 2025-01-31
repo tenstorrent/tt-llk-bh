@@ -1,5 +1,7 @@
 from ttlens.tt_lens_init import init_ttlens
-from ttlens.tt_lens_lib import write_to_device, read_words_from_device, run_elf
+from ttlens.tt_lens_lib import write_to_device, read_words_from_device, run_elf, check_context
+from ttlens.tt_coordinate import OnChipCoordinate
+from ttlens.tt_debug_risc import RiscLoader, RiscDebug, RiscLoc
 from helpers import *
 
 ELF_LOCATION = "../build/elf/"
@@ -18,6 +20,25 @@ def run_elf_files(testname, run_brisc=True):
 
     for i in range(3):
         run_elf(f"{ELF_LOCATION}{testname}_trisc{i}.elf", "0,0", risc_id=i + 1)
+        # risc_id = i+1
+        # context = check_context()
+        # device = context.devices[0]
+        # location = OnChipCoordinate.create("0,0", device)
+        # rdbg = RiscDebug(RiscLoc(location, 0, risc_id), context, False)
+        # rloader = RiscLoader(rdbg, context, False)
+        # rdbg.enable_debug()
+        # try:
+        #     with rdbg.ensure_halted():
+        #         # rdbg.write_memory(0xFFEC1000,0xdead)
+        #         # rdbg.write_memory(0xFFEC2000,0xaadd)
+        #         # rdbg.write_memory(0xFFEC3000,0xccee)
+        #         print("MAILBOX: ", i , hex(0xFFEC1000 + 0x1000 * i) , hex(rdbg.read_memory(0xFFEC1000 + 0x1000 * i)))
+        #         for j in range(10):
+        #             print("MATH MAILBOX from ", i  ," risc ", (hex(rdbg.read_memory(0xFFEC2000))))
+        #         # print("PACK MAILBOX: ", rdbg.read_memory(0xFFEC3000))
+        # except Exception as e:
+        #     print(e)
+        #     pass
 
 def write_stimuli_to_l1(buffer_A, buffer_B, stimuli_format, tile_cnt = 1):
 

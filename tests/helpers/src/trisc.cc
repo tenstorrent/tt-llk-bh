@@ -34,7 +34,7 @@ int main()
 	tensix_sync();
     run_kernel();
 
-	*mailbox = KERNEL_COMPLETE; // 0x1
+	*mailbox = 0x1;//KERNEL_COMPLETE; // 0x1
 
 	for(;;){}
 }

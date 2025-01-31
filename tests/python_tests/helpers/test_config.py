@@ -11,6 +11,9 @@ def generate_make_command(test_config):
     make_cmd += f"format={format_args_dict[output_format]} testname={testname} dest_acc={dest_acc} " # jsut for now take output_format
     
     mathop = test_config.get("mathop", "no_mathop")
+    approx_mode = test_config.get("approx_mode","false")
+
+    make_cmd += f" approx_mode={approx_mode} "
 
     if(mathop != "no_mathop"):
         if isinstance(mathop,str): # single tile option
