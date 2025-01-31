@@ -1,0 +1,5 @@
+tests/arch.dump
+tests/dump
+tests/python_tests/list_of_tests.txt
+tests/sfpi/
+tests/tt-smi/
