@@ -5,6 +5,31 @@
 #include "ckernel_structs.h"
 #include "dev_mem_map.h"
 
+extern "C" void wzerorange(uint32_t* start, uint32_t* end) {
+    // manually unrolled 4 times.
+    start += 4;
+#pragma GCC unroll 0
+    while (start <= end) {
+        start[-4] = start[-3] = start[-2] = start[-1] = 0;
+        // Prevent optimizer considering this loop equivalent to
+        // memset (start, 0, (end - start) * sizeof (*start)) -- that's code bloat.
+        asm inline("addi %0,%0,4 * %1" : "+r"(start) : "i"(sizeof(*start)));
+    }
+    // There are 0, 1, 2 or 3 words of residue.
+    // We get better code layout expecting the conditions to be true.
+    start -= 2;
+    if (__builtin_expect(start <= end, true)) {
+        start[-2] = start[-1] = 0;
+        start += 2;
+    }
+    start -= 1;
+    if (__builtin_expect(start <= end, true)) {
+        start[-1] = 0;
+    }
+}
+
+inline void wzeromem(uint32_t start, uint32_t len) { wzerorange((uint32_t*)start, (uint32_t*)(start + len)); }
+
 using namespace ckernel;
 
 constexpr uint32_t RISCV_IC_BRISC_MASK = 0x1;
@@ -56,8 +81,13 @@ void device_setup() {
 
     WRITE_REG(RISCV_TDMA_REG_CLK_GATE_EN, 0x3f);  // Enable clock gating
 
+    // *((uint32_t volatile*)RISCV_DEBUG_REG_CG_CTRL_EN) = 0x0; // disable clock gating
+    // *((uint32_t volatile*)RISCV_DEBUG_REG_DEST_CG_CTRL) = 0x0; // disable clock gating
+
     set_deassert_addresses();
 
+    wzeromem(MEM_ZEROS_BASE,MEM_ZEROS_SIZE);
+    
     // Invalidate tensix icache for all 4 risc cores
     cfg_regs[RISCV_IC_INVALIDATE_InvalidateAll_ADDR32] = RISCV_IC_BRISC_MASK | RISCV_IC_TRISC_ALL_MASK | RISCV_IC_NCRISC_MASK;
     
