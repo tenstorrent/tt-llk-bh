@@ -8,19 +8,24 @@ torch.set_printoptions(linewidth=500)
 def generate_golden(operand1,format):
     return operand1
 
-@pytest.mark.parametrize("format",  ["Float32"]) #["Bfp8_b", "Float16_b", "Float16", "Int32","Float32"])
+formats = ["Float32","Bfp8_b", "Float16_b", "Float16", "Int32","Float32"]
+#formats = ["Float32"]
+@pytest.mark.parametrize("input_format", formats)
+@pytest.mark.parametrize("output_format", formats)
 @pytest.mark.parametrize("testname", ["eltwise_unary_datacopy_test"])
 @pytest.mark.parametrize("dest_acc", ["DEST_ACC"])
-def test_all(format, testname, dest_acc):
+def test_all(input_format, output_format, testname, dest_acc):
     #context = init_debuda()
-    src_A,src_B = generate_stimuli(format)
+    if input_format != output_format:
+        pytest.skip("")
+    src_A,src_B = generate_stimuli(input_format)
     srcB = torch.full((1024,), 0)
-    golden = generate_golden(src_A,format)
-    write_stimuli_to_l1(src_A, src_B, format)
+    golden = generate_golden(src_A,output_format)
+    write_stimuli_to_l1(src_A, src_B, input_format)
 
     test_config = {
-        "input_format": format,
-        "output_format": format,
+        "input_format": input_format,
+        "output_format": output_format,
         "testname": testname,
         "dest_acc": dest_acc,
     }
@@ -30,7 +35,7 @@ def test_all(format, testname, dest_acc):
     os.system(f"cd .. && {make_cmd}")
     run_elf_files(testname)
 
-    res_from_L1 = collect_results(format,src_A)
+    res_from_L1 = collect_results(output_format,src_A)
 
     os.system("cd .. && make clean")
 
@@ -41,15 +46,15 @@ def test_all(format, testname, dest_acc):
     assert read_words_from_device("0,0", 0x19FF8, word_count=1)[0].to_bytes(4, 'big') == b'\x00\x00\x00\x01'
     assert read_words_from_device("0,0", 0x19FFC, word_count=1)[0].to_bytes(4, 'big') == b'\x00\x00\x00\x01'
 
-    if(format in format_dict):
+    if(output_format in format_dict):
         atol = 0.05
         rtol = 0.1
     else:
         atol = 0.2
         rtol = 0.1
 
-    golden_tensor = torch.tensor(golden, dtype=format_dict[format] if format in ["Float16", "Float16_b", "Float32", "Int32"] else torch.bfloat16)
-    res_tensor = torch.tensor(res_from_L1, dtype=format_dict[format] if format in ["Float16", "Float16_b", "Float32", "Int32"] else torch.bfloat16)
+    golden_tensor = torch.tensor(golden, dtype=format_dict[output_format] if output_format in ["Float16", "Float16_b", "Float32", "Int32"] else torch.bfloat16)
+    res_tensor = torch.tensor(res_from_L1, dtype=format_dict[output_format] if output_format in ["Float16", "Float16_b", "Float32", "Int32"] else torch.bfloat16)
 
     for i in range(len(golden)):
         assert torch.isclose(golden_tensor[i],res_tensor[i], rtol = rtol, atol = atol), f"Failed at index {i} with values {golden[i]} and {res_from_L1[i]}"

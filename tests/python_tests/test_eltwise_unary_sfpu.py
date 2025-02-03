@@ -26,20 +26,24 @@ def generate_golden(operation, operand1, data_format):
 
     return res
 
-@pytest.mark.parametrize("format", ["Float16_b","Float16"])
+formats = ["Float16_b","Float16"]
+@pytest.mark.parametrize("input_format", formats)
+@pytest.mark.parametrize("output_format", formats)
 @pytest.mark.parametrize("testname", ["eltwise_unary_sfpu_test"])
 @pytest.mark.parametrize("mathop", ["sqrt", "log","square"])
 @pytest.mark.parametrize("dest_acc", ["","DEST_ACC"])
 @pytest.mark.parametrize("approx_mode", ["true","false"])
-def test_all(format, mathop, testname, dest_acc, approx_mode):
+def test_all(input_format, output_format, mathop, testname, dest_acc, approx_mode):
     #context = init_debuda()
-    src_A,src_B = generate_stimuli(format,sfpu = True)
-    golden = generate_golden(mathop, src_A, format)
-    write_stimuli_to_l1(src_A, src_B, format)
+    if input_format != output_format:
+        pytest.skip("")
+    src_A,src_B = generate_stimuli(input_format,sfpu = True)
+    golden = generate_golden(mathop, src_A, output_format)
+    write_stimuli_to_l1(src_A, src_B, input_format)
 
     test_config = {
-        "input_format": format,
-        "output_format": format,
+        "input_format": input_format,
+        "output_format": output_format,
         "testname": testname,
         "dest_acc": dest_acc,
         "mathop": mathop,
@@ -51,7 +55,7 @@ def test_all(format, mathop, testname, dest_acc, approx_mode):
 
     run_elf_files(testname)
     
-    res_from_L1 = collect_results(format,src_A,sfpu=True)
+    res_from_L1 = collect_results(output_format,src_A,sfpu=True)
 
     os.system("cd .. && make clean")
 
@@ -62,10 +66,10 @@ def test_all(format, mathop, testname, dest_acc, approx_mode):
     assert read_words_from_device("0,0", 0x19FF8, word_count=1)[0].to_bytes(4, 'big') == b'\x00\x00\x00\x01'
     assert read_words_from_device("0,0", 0x19FFC, word_count=1)[0].to_bytes(4, 'big') == b'\x00\x00\x00\x01'
 
-    golden_tensor = torch.tensor(golden, dtype=format_dict[format] if format in ["Float16", "Float16_b"] else torch.bfloat16)
-    res_tensor = torch.tensor(res_from_L1, dtype=format_dict[format] if format in ["Float16", "Float16_b"] else torch.bfloat16)
+    golden_tensor = torch.tensor(golden, dtype=format_dict[output_format] if output_format in ["Float16", "Float16_b"] else torch.bfloat16)
+    res_tensor = torch.tensor(res_from_L1, dtype=format_dict[output_format] if output_format in ["Float16", "Float16_b"] else torch.bfloat16)
 
-    if(format == "Float16_b" or format == "Float16"):
+    if(output_format == "Float16_b" or output_format == "Float16"):
         atol = 0.05
         rtol = 0.1
 

@@ -10,6 +10,7 @@ def collect_results(format, src_A,address=0x1c000,sfpu=False):
     read_words_cnt = calculate_read_words_cnt(format,src_A,sfpu)
     read_data = read_words_from_device("0,0", address, word_count=read_words_cnt)
     read_data_bytes = flatten_list([int_to_bytes_list(data) for data in read_data])
+    print("RESULT = ", read_data_bytes)
     res_from_L1 = get_result_from_device(format,read_data_bytes)
     return res_from_L1
 

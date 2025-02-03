@@ -31,21 +31,25 @@ def generate_golden(operations, operand1, operand2, data_format):
     
     return res
 
-@pytest.mark.parametrize("format", [ "Float16_b", "Float16_b", "Bfp8_b"])
+formats = [ "Float16_b", "Float16_b", "Bfp8_b"]
+@pytest.mark.parametrize("input_format", formats)
+@pytest.mark.parametrize("output_format", formats)
 @pytest.mark.parametrize("dest_acc", ["","DEST_ACC"])
 @pytest.mark.parametrize("testname", ["fill_dest_test"])
-def test_multiple_kernels(format, testname, dest_acc):
-
+def test_multiple_kernels(input_format, output_format, testname, dest_acc):
+    if input_format != output_format:
+        pytest.skip("")
+        
     pack_start_address = 0x1c000
     pack_addresses = [pack_start_address + 0x1000 * i for i in range(16)]
 
-    src_A, src_B = generate_stimuli(format)
-    golden = generate_golden([2]*16,src_A,src_B,format)
-    write_stimuli_to_l1(src_A,src_B,format)
+    src_A, src_B = generate_stimuli(input_format)
+    golden = generate_golden([2]*16,src_A,src_B,output_format)
+    write_stimuli_to_l1(src_A,src_B,input_format)
 
     test_config = {
-        "input_format": format,
-        "output_format": format,
+        "input_format": input_format,
+        "output_format": output_format,
         "testname": testname,
         "dest_acc": dest_acc,
     }
@@ -64,20 +68,20 @@ def test_multiple_kernels(format, testname, dest_acc):
     res_from_L1 = []
 
     for address in pack_addresses:
-        res_from_L1.append(collect_results(format,src_A,address))
+        res_from_L1.append(collect_results(output_format,src_A,address))
      
     res_from_L1 = flatten_list(res_from_L1)
     golden = flatten_list(golden)
 
     assert len(res_from_L1) == len(golden)
 
-    golden_tensor = torch.tensor(golden, dtype=format_dict[format] if format in ["Float16", "Float16_b"] else torch.bfloat16)
-    res_tensor = torch.tensor(res_from_L1, dtype=format_dict[format] if format in ["Float16", "Float16_b"] else torch.bfloat16)
+    golden_tensor = torch.tensor(golden, dtype=format_dict[output_format] if output_format in ["Float16", "Float16_b"] else torch.bfloat16)
+    res_tensor = torch.tensor(res_from_L1, dtype=format_dict[output_format] if output_format in ["Float16", "Float16_b"] else torch.bfloat16)
 
-    if(format == "Float16_b" or format == "Float16"):
+    if(output_format == "Float16_b" or output_format == "Float16"):
         atol = 0.05
         rtol = 0.1
-    elif(format == "Bfp8_b"):
+    elif(output_format == "Bfp8_b"):
         atol = 0.1
         rtol = 0.2
 
