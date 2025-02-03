@@ -24,14 +24,14 @@ def generate_golden(operation, operand1, operand2, data_format):
     return operations[operation].tolist()
 
 formats = ["Bfp8_b", "Float16_b", "Float16"]
-formats = ["Bfp8_b"]
+#formats = ["Bfp8_b"]
 mathops = ["elwadd", "elwsub", "elwmul"]
-mathops = ["elwadd"]
+#mathops = ["elwadd"]
 @pytest.mark.parametrize("input_format", formats)
 @pytest.mark.parametrize("output_format", formats)
 @pytest.mark.parametrize("testname", ["eltwise_binary_test"])
 @pytest.mark.parametrize("mathop", mathops)
-@pytest.mark.parametrize("dest_acc", [""])#, "DEST_ACC"])
+@pytest.mark.parametrize("dest_acc", ["", "DEST_ACC"])
 def test_all(input_format, output_format,mathop, testname, dest_acc):
     #context = init_debuda()
     if input_format != output_format:

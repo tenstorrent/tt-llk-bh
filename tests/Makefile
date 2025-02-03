@@ -25,7 +25,8 @@ OPTIONS_LINK=-fexceptions -Wl,-z,max-page-size=16 -Wl,-z,common-page-size=16 -no
 INCLUDES = -I../llk_lib -I../common/inc -I../common/inc/sfpu
 INCLUDES += -I../firmware/riscv/common -I../firmware/riscv/$(CHIP_ARCH) -Isfpi/include -Ihelpers/include -Ihelpers/operations
 
-FORMAT_ARG:=-D$(format) 
+FORMAT_ARG:=-D$(input_format) -D$(output_format) 
+FORMAT_VAR:=-Dinput_format -Doutput_format
 
 ifeq ($(mathop),)
     MATHOP_ARG =
@@ -50,7 +51,7 @@ else
 	OPTIONS_PACK= 
 endif
 
-OPTIONS_COMPILE+=$(FORMAT_ARG) $(MATHOP_ARG) -DTILE_SIZE_CNT=0x1000
+OPTIONS_COMPILE+=$(FORMAT_ARG) $(FORMAT_VAR) $(MATHOP_ARG) -DTILE_SIZE_CNT=0x1000
 OPTIONS_COMPILE+=$(INCLUDES)
 
 ifeq ($(dest_acc), DEST_ACC) 

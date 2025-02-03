@@ -27,9 +27,9 @@ volatile uint32_t* buffer_A = (volatile uint32_t*)0x1a000;
 
 void run_kernel()
 {
-    _llk_unpack_A_hw_configure_<is_fp32_dest_acc_en, StochRndType::None>(DATA_FORMAT,DATA_FORMAT,FACE_R_DIM,0,4);
-    _llk_unpack_A_init_<BroadcastType::NONE, false, EltwiseBinaryReuseDestType::NONE, unpack_to_dest>(0, 0, FACE_R_DIM, 4, DATA_FORMAT,DATA_FORMAT);
-    _llk_unpack_A_<BroadcastType::NONE, false, EltwiseBinaryReuseDestType::NONE, unpack_to_dest>((((uint32_t)buffer_A)/16)-1, 0, DATA_FORMAT,DATA_FORMAT);
+    _llk_unpack_A_hw_configure_<is_fp32_dest_acc_en, StochRndType::None>(IN_FORMAT,IN_FORMAT,FACE_R_DIM,0,4);
+    _llk_unpack_A_init_<BroadcastType::NONE, false, EltwiseBinaryReuseDestType::NONE, unpack_to_dest>(0, 0, FACE_R_DIM, 4, IN_FORMAT,IN_FORMAT);
+    _llk_unpack_A_<BroadcastType::NONE, false, EltwiseBinaryReuseDestType::NONE, unpack_to_dest>((((uint32_t)buffer_A)/16)-1, 0, IN_FORMAT,IN_FORMAT);
 }
 
 #endif
@@ -48,11 +48,11 @@ using namespace ckernel::sfpu;
 void run_kernel()
 {
     // copy srca to dest
-    _llk_math_eltwise_unary_datacopy_init_<DataCopyType::A2D, BroadcastType::NONE,false, is_fp32_dest_acc_en, false>(0, 0, 4, DATA_FORMAT);
+    _llk_math_eltwise_unary_datacopy_init_<DataCopyType::A2D, BroadcastType::NONE,false, is_fp32_dest_acc_en, false>(0, 0, 4, IN_FORMAT);
     _llk_math_pack_sync_init_<DstSync::SyncFull,is_fp32_dest_acc_en>();
-    _llk_math_hw_configure_<false,false>(DATA_FORMAT, DATA_FORMAT);
+    _llk_math_hw_configure_<false,false>(IN_FORMAT, IN_FORMAT);
     _llk_math_wait_for_dest_available_<DstSync::SyncFull>();
-    _llk_math_eltwise_unary_datacopy_<DataCopyType::A2D, DstSync::SyncFull, BroadcastType::NONE, is_fp32_dest_acc_en, unpack_to_dest>(0, DATA_FORMAT, DATA_FORMAT);
+    _llk_math_eltwise_unary_datacopy_<DataCopyType::A2D, DstSync::SyncFull, BroadcastType::NONE, is_fp32_dest_acc_en, unpack_to_dest>(0, IN_FORMAT, IN_FORMAT);
     
     // calculation of sfpu operation on dest
     _llk_math_eltwise_unary_sfpu_init_<SFPU_OPERATION>();
@@ -82,8 +82,8 @@ void run_kernel()
     {
         buffer_Dest[i] = 0xdeadbeef;
     }
-    _llk_pack_hw_configure_<false, is_fp32_dest_acc_en, false>(DATA_FORMAT, DATA_FORMAT, 16*16*4);
-    _llk_pack_init_<false, false, DstTileFaceLayout::RowMajor, false>(DATA_FORMAT);
+    _llk_pack_hw_configure_<false, is_fp32_dest_acc_en, false>(IN_FORMAT, IN_FORMAT, 16*16*4);
+    _llk_pack_init_<false, false, DstTileFaceLayout::RowMajor, false>(IN_FORMAT);
     #ifdef ARCH_BLACKHOLE
     _llk_pack_dest_init_<DstSync::SyncFull,DstTileFaceLayout::RowMajor,is_fp32_dest_acc_en>();
     #else
