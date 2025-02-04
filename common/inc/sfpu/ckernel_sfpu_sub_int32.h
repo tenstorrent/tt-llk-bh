@@ -32,28 +32,23 @@ inline void _sub_int32_(const uint dst_offset) {
     #pragma GCC unroll 8
     for (int d = 0; d < ITERATIONS; d++) {
         // operand B - int32
-        TT_SFPLOAD(1 /*lreg*/, INSTR_MOD_LOAD_STORE, ADDR_MOD_7, dst_offset * 64);
+        TT_SFPLOAD(0 /*lreg*/, INSTR_MOD_LOAD_STORE, ADDR_MOD_7, dst_offset * 64 /*dest_reg_addr */);
+        if constexpr (SIGN_MAGNITUDE_FORMAT) {
+            TTI_SFPCAST(0 /*lreg*/, 2 /*ldest*/, INSTR_MOD_CAST);
+            // Required after cast due to a bug in Blackhole RTL.
+            TTI_SFPSETSGN(0 /* imm */, 2 /*lreg_c*/, 0 /*ldest*/, 0 /*imod*/);
+        }
+
+        // operand A - int32
+        TTI_SFPLOAD(1 /*lreg*/, INSTR_MOD_LOAD_STORE, ADDR_MOD_7, 0);
         if constexpr (SIGN_MAGNITUDE_FORMAT) {
             TTI_SFPCAST(1 /*lreg*/, 2 /*ldest*/, INSTR_MOD_CAST);
             // Required after cast due to a bug in Blackhole RTL.
             TTI_SFPSETSGN(0 /* imm */, 2 /*lreg_c*/, 1 /*ldest*/ , 0 /*imod*/);
         }
 
-        // Invert B's bits, then add 1 to invert the sign
-        TTI_SFPNOT(0 /*imm*/, 1 /*lreg*/, 0 /*ldest*/, 0 /*imod*/);
-        TT_SFPLOADI(1 /*lreg*/, INSTR_MOD_LOAD_STORE, 1 /*imm*/);
-        TTI_SFPIADD(0 /*imm*/, 1 /*lreg_c*/, 0 /*lreg_dest*/, 4 /*imod*/);
-        TTI_NOP;
-
-        // operand A - int32
-        TTI_SFPLOAD(1 /*lreg*/, INSTR_MOD_LOAD_STORE, ADDR_MOD_7, 0 /*dest_reg_addr */);
-        if constexpr (SIGN_MAGNITUDE_FORMAT) {
-            TTI_SFPCAST(1 /*lreg*/, 2 /*ldest*/, INSTR_MOD_CAST);
-            // Required after cast due to a bug in Blackhole RTL.
-            TTI_SFPSETSGN(0 /* imm */, 2 /*lreg_c*/, 0 /*ldest*/, 0 /*imod*/);
-        }
-
-        TTI_SFPIADD(0 /*imm*/, 1 /*lreg_c*/, 0 /*lreg_dest*/, 4 /*imod*/);
+        // Set instruction modifier to 6 to get B's 2's complement
+        TTI_SFPIADD(0 /*imm*/, 1 /*lreg_c*/, 0 /*lreg_dest*/, 6 /*imod*/);
         // MAD has a 2-cycle pipeline latency so we need one cycle latency until next instr can consume the result
         TTI_NOP;
 
