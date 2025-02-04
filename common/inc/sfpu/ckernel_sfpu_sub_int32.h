@@ -40,9 +40,9 @@ inline void _sub_int32_(const uint dst_offset) {
         }
 
         // Invert B's bits, then add 1 to invert the sign
-        TTI_SFPNOT(0, 1, 0, 0);
-        TT_SFPLOADI(1, INSTR_MOD_LOAD_STORE, 1);
-        TTI_SFPIADD(0, 1, 0, 4);
+        TTI_SFPNOT(0 /*imm*/, 1 /*lreg*/, 0 /*ldest*/, 0 /*imod*/);
+        TT_SFPLOADI(1 /*lreg*/, INSTR_MOD_LOAD_STORE, 1 /*imm*/);
+        TTI_SFPIADD(0 /*imm*/, 1 /*lreg_c*/, 0 /*lreg_dest*/, 4 /*imod*/);
         TTI_NOP;
 
         // operand A - int32
