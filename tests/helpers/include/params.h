@@ -4,45 +4,43 @@
 #include <cstdint>
 #include <cstdarg>
 
-#ifdef input_format
 
-    #ifdef FORMAT_FLOAT16_B
-        #define IN_FORMAT (uint32_t)DataFormat::Float16_b
-    #endif
-    #ifdef FORMAT_FLOAT16
-        #define IN_FORMAT (uint32_t)DataFormat::Float16
-    #endif
-    #ifdef FORMAT_FLOAT32
-        #define IN_FORMAT (uint32_t)DataFormat::Float32
-    #endif
-    #ifdef FORMAT_INT32
-        #define IN_FORMAT (uint32_t)DataFormat::Int32
-    #endif
-    #ifdef FORMAT_BFP8_B
-        #define IN_FORMAT (uint32_t)DataFormat::Bfp8_b 
-    #endif
-
+#ifdef INPUT_FORMAT_FLOAT16_B
+    #define IN_FORMAT (uint32_t)DataFormat::Float16_b
+#endif
+#ifdef INPUT_FORMAT_FLOAT16
+    #define IN_FORMAT (uint32_t)DataFormat::Float16
+#endif
+#ifdef INPUT_FORMAT_FLOAT32
+    #define IN_FORMAT (uint32_t)DataFormat::Float32
+#endif
+#ifdef INPUT_FORMAT_INT32
+    #define IN_FORMAT (uint32_t)DataFormat::Int32
+#endif
+#ifdef INPUT_FORMAT_BFP8_B
+    #define IN_FORMAT (uint32_t)DataFormat::Bfp8_b 
 #endif
 
-#ifdef output_format
 
-    #ifdef FORMAT_FLOAT16_B
-        #define OUT_FORMAT (uint32_t)DataFormat::Float16_b
-    #endif
-    #ifdef FORMAT_FLOAT16
-        #define OUT_FORMAT (uint32_t)DataFormat::Float16
-    #endif
-    #ifdef FORMAT_FLOAT32
-        #define OUT_FORMAT (uint32_t)DataFormat::Float32
-    #endif
-    #ifdef FORMAT_INT32
-        #define OUT_FORMAT (uint32_t)DataFormat::Int32
-    #endif
-    #ifdef FORMAT_BFP8_B
-        #define OUT_FORMAT (uint32_t)DataFormat::Bfp8_b 
-    #endif
 
+
+#ifdef OUTPUT_FORMAT_FLOAT16_B
+    #define OUT_FORMAT (uint32_t)DataFormat::Float16_b
 #endif
+#ifdef OUTPUT_FORMAT_FLOAT16
+    #define OUT_FORMAT (uint32_t)DataFormat::Float16
+#endif
+#ifdef OUTPUT_FORMAT_FLOAT32
+    #define OUT_FORMAT (uint32_t)DataFormat::Float32
+#endif
+#ifdef OUTPUT_FORMAT_INT32
+    #define OUT_FORMAT (uint32_t)DataFormat::Int32
+#endif
+#ifdef OUTPUT_FORMAT_BFP8_B
+    #define OUT_FORMAT (uint32_t)DataFormat::Bfp8_b 
+#endif
+
+
 
 #ifdef LLK_TRISC_MATH
 
