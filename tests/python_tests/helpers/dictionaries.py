@@ -31,6 +31,54 @@ output_formats_dict = {
     "Int32": "OUTPUT_FORMAT_INT32"
 }
 
+unpack_src_dict = {
+    "Float32": "UNPACK_SRC_FLOAT32",
+    "Float16": "UNPACK_SRC_FLOAT16",
+    "Float16_b": "UNPACK_SRC_FLOAT16_B",
+    "Bfp8_b" : "UNPACK_SRC_BFP8_B",
+    "Int32": "UNPACK_SRC_INT32"
+}
+
+unpack_dst_dict = {
+    "Float32": "UNPACK_DST_FLOAT32",
+    "Float16": "UNPACK_DST_FLOAT16",
+    "Float16_b": "UNPACK_DST_FLOAT16_B",
+    "Bfp8_b" : "UNPACK_DST_BFP8_B",
+    "Int32": "UNPACK_DST_INT32"
+}
+
+math_src_dict = {
+    "Float32": "MATH_SRC_FLOAT32",
+    "Float16": "MATH_SRC_FLOAT16",
+    "Float16_b": "MATH_SRC_FLOAT16_B",
+    "Bfp8_b" : "MATH_SRC_BFP8_B",
+    "Int32": "MATH_SRC_INT32"
+}
+
+math_dst_dict = {
+    "Float32": "MATH_DST_FLOAT32",
+    "Float16":"MATH_DST_FLOAT16",
+    "Float16_b": "MATH_DST_FLOAT16_B",
+    "Bfp8_b" : "MATH_DST_BFP8_B",
+    "Int32": "MATH_DST_INT32"
+}
+
+pack_src_dict = {
+    "Float32": "PACK_SRC_FLOAT32",
+    "Float16": "PACK_SRC_FLOAT16",
+    "Float16_b": "PACK_SRC_FLOAT16_B",
+    "Bfp8_b" : "PACK_SRC_BFP8_B",
+    "Int32": "PACK_SRC_INT32"
+}
+
+pack_dst_dict = {
+    "Float32": "PACK_DST_FLOAT32",
+    "Float16": "PACK_DST_FLOAT16",
+    "Float16_b": "PACK_DST_FLOAT16_B",
+    "Bfp8_b" : "PACK_DST_BFP8_B",
+    "Int32": "PACK_DST_INT32"
+}
+
 mathop_args_dict = {
     "elwadd": "ELTWISE_BINARY_ADD",
     "elwsub": "ELTWISE_BINARY_SUB",

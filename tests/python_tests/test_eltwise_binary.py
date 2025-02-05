@@ -27,24 +27,33 @@ formats = ["Bfp8_b", "Float16_b", "Float16"]
 #formats = ["Bfp8_b"]
 mathops = ["elwadd", "elwsub", "elwmul"]
 #mathops = ["elwadd"]
-@pytest.mark.parametrize("input_format", formats)
-@pytest.mark.parametrize("output_format", formats)
+# @pytest.mark.parametrize("input_format", formats)
+# @pytest.mark.parametrize("output_format", formats)
+@pytest.mark.parametrize("unpack_src", formats)
+@pytest.mark.parametrize("unpack_dst", formats)
+#@pytest.mark.parametrize("math_src", formats)
+@pytest.mark.parametrize("math_dst", formats)
+@pytest.mark.parametrize("pack_src", formats)
+@pytest.mark.parametrize("pack_dst", formats)
 @pytest.mark.parametrize("testname", ["eltwise_binary_test"])
 @pytest.mark.parametrize("mathop", mathops)
 @pytest.mark.parametrize("dest_acc", ["", "DEST_ACC"])
-def test_all(input_format, output_format,mathop, testname, dest_acc):
+def test_all(unpack_src, unpack_dst, math_dst, pack_src, pack_dst, mathop, testname, dest_acc):
     #context = init_debuda()
-    if input_format != output_format:
-        pytest.skip("")
-    src_A, src_B = generate_stimuli(input_format)
+    # if input_format != output_format:
+    #     pytest.skip("")
+    src_A, src_B = generate_stimuli(unpack_src)
     print("SRC_A = ", src_A)
     print("SRC_B = ", src_B)
-    golden = generate_golden(mathop, src_A, src_B, output_format)
-    write_stimuli_to_l1(src_A, src_B, input_format)
+    golden = generate_golden(mathop, src_A, src_B, pack_dst)
+    write_stimuli_to_l1(src_A, src_B, unpack_src)
 
     test_config = {
-        "input_format": input_format,
-        "output_format": output_format,
+        "unpack_src": unpack_src,
+        "unpack_dst": unpack_dst,
+        "math_dst": math_dst,
+        "pack_src": pack_src,
+        "pack_dst": pack_dst,
         "testname": testname,
         "dest_acc": dest_acc,
         "mathop": mathop
@@ -55,7 +64,7 @@ def test_all(input_format, output_format,mathop, testname, dest_acc):
 
     run_elf_files(testname)
     
-    res_from_L1 = collect_results(output_format,src_A)
+    res_from_L1 = collect_results(pack_dst,src_A)
     print()
     print("GOLDEN = ", golden)
     
@@ -68,15 +77,15 @@ def test_all(input_format, output_format,mathop, testname, dest_acc):
     assert read_words_from_device("0,0", 0x19FF8, word_count=1)[0].to_bytes(4, 'big') == b'\x00\x00\x00\x01'
     assert read_words_from_device("0,0", 0x19FFC, word_count=1)[0].to_bytes(4, 'big') == b'\x00\x00\x00\x01'
 
-    if(output_format == "Float16_b" or output_format == "Float16"):
+    if(pack_dst == "Float16_b" or pack_dst == "Float16"):
         atol = 0.05
         rtol = 0.1
-    elif(output_format == "Bfp8_b"):
+    elif(pack_dst == "Bfp8_b"):
         atol = 0.1
         rtol = 0.2
 
-    golden_tensor = torch.tensor(golden, dtype=format_dict[output_format] if output_format in ["Float16", "Float16_b"] else torch.bfloat16)
-    res_tensor = torch.tensor(res_from_L1, dtype=format_dict[output_format] if output_format in ["Float16", "Float16_b"] else torch.bfloat16)
+    golden_tensor = torch.tensor(golden, dtype=format_dict[pack_dst] if pack_dst in ["Float16", "Float16_b"] else torch.bfloat16)
+    res_tensor = torch.tensor(res_from_L1, dtype=format_dict[pack_dst] if pack_dst in ["Float16", "Float16_b"] else torch.bfloat16)
     print("RESULT TENSOR = ", res_tensor)
     print("GOLDEN TENSOR= ", golden_tensor)
 

@@ -25,7 +25,7 @@ OPTIONS_LINK=-fexceptions -Wl,-z,max-page-size=16 -Wl,-z,common-page-size=16 -no
 INCLUDES = -I../llk_lib -I../common/inc -I../common/inc/sfpu
 INCLUDES += -I../firmware/riscv/common -I../firmware/riscv/$(CHIP_ARCH) -Isfpi/include -Ihelpers/include -Ihelpers/operations
 
-FORMAT_ARG:=-D$(input_format) -D$(output_format) 
+FORMAT_ARG:=-D$(unpack_src) -D$(unpack_dst) -D$(math_dst) -D$(pack_src) -D$(pack_dst) 
 #FORMAT_VAR:=-Dinput_format -Doutput_format
 
 ifeq ($(mathop),)
