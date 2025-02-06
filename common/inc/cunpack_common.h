@@ -156,7 +156,11 @@ namespace ckernel::unpacker
    // Wait for threshold of busy contexts to fall below total available contexts
    inline void wait_for_next_context(const uint num_contexts)
    {
-       while (semaphore_read(semaphore::UNPACK_SYNC) >= num_contexts) {}
+       while (semaphore_read(semaphore::UNPACK_SYNC) >= num_contexts)
+       {
+           // Allow other threads to update semaphore.
+           asm volatile("nop");
+       }
    }
 
    inline void switch_config_context(uint &unp_cfg_context)
