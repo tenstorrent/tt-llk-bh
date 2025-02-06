@@ -3,8 +3,6 @@ import torch
 import os
 from helpers import *
 
-test_results = []
-
 def generate_golden(operation, operand1, operand2, data_format):
     if( data_format == "Float16" or data_format == "Float16_b"):
         tensor1_float = operand1.clone().detach().to(format_dict[data_format])
@@ -26,31 +24,20 @@ def generate_golden(operation, operand1, operand2, data_format):
     return operations[operation].tolist()
 
 formats = ["Bfp8_b", "Float16_b", "Float16"]
-formats = ["Bfp8_b", "Float16_b"]
-#formats = ["Float16_b", "Float16_b"]
-#try_formats = ["Bfp8_b", "Bfp8_b"]
 mathops = ["elwadd", "elwsub", "elwmul"]
-mathops = ["elwadd"]
 accumulation = ["", "DEST_ACC"]
-accumulation = [""]
-# @pytest.mark.parametrize("input_format", formats)
-# @pytest.mark.parametrize("output_format", formats)
 @pytest.mark.parametrize("unpack_src", formats)
 @pytest.mark.parametrize("unpack_dst", formats)
-#@pytest.mark.parametrize("math_src", formats)
 @pytest.mark.parametrize("math_dst", formats)
 @pytest.mark.parametrize("pack_src", formats)
 @pytest.mark.parametrize("pack_dst", formats)
 @pytest.mark.parametrize("testname", ["eltwise_binary_test"])
 @pytest.mark.parametrize("mathop", mathops)
 @pytest.mark.parametrize("dest_acc", accumulation)
-def test_all(unpack_src, unpack_dst, math_dst, pack_src, pack_dst, mathop, testname, dest_acc):
+def test_all(unpack_src, unpack_dst, math_dst, pack_src, pack_dst, mathop, testname, dest_acc, test_results):
     #context = init_debuda()
-    # if unpack_dst != math_dst and math_dst != pack_src:
-    #     pytest.skip("")
+
     src_A, src_B = generate_stimuli(unpack_src)
-    print("SRC_A = ", src_A)
-    print("SRC_B = ", src_B)
     golden = generate_golden(mathop, src_A, src_B, pack_dst)
     write_stimuli_to_l1(src_A, src_B, unpack_src)
 
@@ -73,10 +60,12 @@ def test_all(unpack_src, unpack_dst, math_dst, pack_src, pack_dst, mathop, testn
     # os.system("tt-smi -r 0")
     
     res_from_L1 = collect_results(pack_dst,src_A)
-    print()
-    print("GOLDEN = ", golden)
     
-    test_results.append([testname, mathop, unpack_src,unpack_dst, math_dst, pack_src, pack_dst,"FAIL"])
+    acc = "OFF"
+    if dest_acc != "":
+        acc = "ON"
+    test_results.append(["FAIL", unpack_src, pack_dst, 0, "deadbeef",unpack_src,unpack_dst, math_dst, pack_src, pack_dst, mathop, acc])
+    # test_results.append(["FAIL", unpack_src, pack_dst, unpack_src,unpack_dst, math_dst, pack_src, pack_dst, mathop, acc])
     
     assert len(res_from_L1) == len(golden)
 
@@ -97,33 +86,13 @@ def test_all(unpack_src, unpack_dst, math_dst, pack_src, pack_dst, mathop, testn
 
     golden_tensor = torch.tensor(golden, dtype=format_dict[pack_dst] if pack_dst in ["Float16", "Float16_b"] else torch.bfloat16)
     res_tensor = torch.tensor(res_from_L1, dtype=format_dict[pack_dst] if pack_dst in ["Float16", "Float16_b"] else torch.bfloat16)
-    print("RESULT TENSOR = ", res_tensor)
-    print("GOLDEN TENSOR= ", golden_tensor)
-
     
     for i in range(len(golden)):
+        if str(res_tensor[i]) not in [str(-111.0), str(-6.232981884280766e+18), str(-427.25)]:
+            test_results[-1][4] = res_tensor[i]
         assert torch.isclose(golden_tensor[i],res_tensor[i], rtol = rtol, atol = atol), f"Failed at index {i} with values {golden[i]} and {res_from_L1[i]}"
 
     _ , pcc = comp_pcc(golden_tensor, res_tensor, pcc=0.99) 
     assert pcc > 0.99
-    test_results[-1][-1] = "PASS"
-
-
-def pytest_terminal_summary(terminalreporter, exitstatus, config):
-    # Print header
-    print(test_results)
-    # terminalreporter.write_sep("=", "Test Results Summary")
-    
-    # # Print table header
-    # terminalreporter.write(f"{'TEST':<10}{'NAME':<10}{'UNPACK SRC':<10}{'UNPACK DST':<10}{'FPU':<10}{'PACK SRC':<10}{'PACK DST':<10}{'RESULT':<10}\n")
-    
-    # # Print results of each test
-    # for result in test_results:
-    #     testname, mathop, unpack_src, unpack_dst, math_dst, pack_src, pack_dst, outcome = result
-    #     terminalreporter.write(f"{testname:<10}{mathop:<10}{unpack_src:<10}{unpack_dst:<10}{math_dst:<10}{pack_src:<10}{pack_dst:<10}{outcome:<10}\n")
-
-    # # Optional: Check the overall result (if you want to customize it further)
-    # if exitstatus == 0:
-    #     terminalreporter.write("\nAll tests passed.\n")
-    # else:
-    #     terminalreporter.write("\nSome tests failed.\n")
+    test_results[-1][3] = pcc
+    test_results[-1][0] = "PASS"
