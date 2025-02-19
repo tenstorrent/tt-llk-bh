@@ -45,7 +45,7 @@ def test_results():
     
     def sort_key(entry):
         # Sorting by mathop first, then by dest_acc ("" for off comes before "DEST_ACC" for on)
-        return (entry[1], entry[2], entry[8],entry[3])  
+        return (entry[1], entry[2], entry[9], entry[8], -entry[3])  
     
     sorted_pass_results = sorted(pass_results, key=sort_key)
     sorted_fail_results = sorted(fail_results, key=sort_key)

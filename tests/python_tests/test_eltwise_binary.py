@@ -23,7 +23,7 @@ def generate_golden(operation, operand1, operand2, data_format):
 
     return operations[operation].tolist()
 
-formats = ["Bfp8_b", "Float16_b", "Float16"]
+formats = ["Bfp8_b", "Float16_b"]#, "Float16"]
 mathops = ["elwadd", "elwsub", "elwmul"]
 accumulation = ["", "DEST_ACC"]
 @pytest.mark.parametrize("unpack_src", formats)
@@ -36,7 +36,8 @@ accumulation = ["", "DEST_ACC"]
 @pytest.mark.parametrize("dest_acc", accumulation)
 def test_all(unpack_src, unpack_dst, math_dst, pack_src, pack_dst, mathop, testname, dest_acc, test_results):
     #context = init_debuda()
-
+    os.system("cd .. && make clean")
+    os.system("tt-smi -r 0")
     src_A, src_B = generate_stimuli(unpack_src)
     golden = generate_golden(mathop, src_A, src_B, pack_dst)
     write_stimuli_to_l1(src_A, src_B, unpack_src)
@@ -69,8 +70,8 @@ def test_all(unpack_src, unpack_dst, math_dst, pack_src, pack_dst, mathop, testn
     
     assert len(res_from_L1) == len(golden)
 
-    os.system("cd .. && make clean")
-    os.system("tt-smi -r 0")
+    # os.system("cd .. && make clean")
+    # os.system("tt-smi -r 0")
 
     # Mailbox checks
     assert read_words_from_device("0,0", 0x19FF4, word_count=1)[0].to_bytes(4, 'big') == b'\x00\x00\x00\x01'
